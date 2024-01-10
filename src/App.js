@@ -52,11 +52,21 @@ const App = () => {
 
       setTimeout(async () => {
         clearInterval(countdownInterval);
-        const constraints = { video: true, audio: true };
+        const constraints = {
+          video: {
+            width: { ideal: 1920 }, // Set the desired width
+            height: { ideal: 1080 }, // Set the desired height
+            frameRate: { ideal: 30 }, // Set the desired frame rate
+          },
+          audio: true,
+        };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         setVideoStream(stream);
 
-        const recorder = new MediaRecorder(stream);
+        const recorder = new MediaRecorder(stream, {
+          mimeType: "video/webm;codecs=vp9",
+        });
+
         const recordedChunks = [];
 
         recorder.ondataavailable = (event) => {
@@ -66,13 +76,15 @@ const App = () => {
         };
 
         recorder.onstop = () => {
-          const blob = new Blob(recordedChunks, { type: "video/mp4" });
+          const blob = new Blob(recordedChunks, {
+            type: "video/webm;codecs=vp9",
+          });
 
           // Generate file name based on current date and time
           const now = new Date();
           const fileName = `confession_${now
             .toISOString()
-            .replace(/[:.]/g, "-")}.mp4`;
+            .replace(/[:.]/g, "-")}.webm`;
 
           // Save video
           saveBlobAsFile(blob, fileName);
