@@ -144,9 +144,7 @@ const App = () => {
         position: "fixed",
       }}
     >
-      <h1 style={{ margin: "1rem", textAlign: "center" }}>
-        {question || "VITNEBOKSEN"}
-      </h1>
+      <h1 style={{ margin: "1rem", textAlign: "center" }}>{question}</h1>
       <div
         style={{
           position: "relative",
@@ -238,6 +236,16 @@ const App = () => {
         )}
         {!started && (
           <div>
+            <h3>Velkommen til</h3>
+            <h1
+              style={{
+                margin: "1rem",
+                fontSize: "3rem",
+                textAlign: "center",
+              }}
+            >
+              Vitneboksen
+            </h1>
             <h3>Svar så ærlig du kan på spørsmålet som kommer</h3>
             <button
               onClick={startRecording}
