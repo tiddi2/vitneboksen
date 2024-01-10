@@ -1,0 +1,15 @@
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+* {
+  color: rgb(255, 255, 255);
+  text-align: center;
+}
+button {
+  background-color: #fdb542;
+}
+html {
+  background-color: #1c323a;
+}
