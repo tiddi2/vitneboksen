@@ -29,7 +29,8 @@ const App = () => {
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [recording, setRecording] = useState(false);
   const [question, setQuestion] = useState(null);
-
+  const [countdown, setCountdown] = useState(10);
+  const [started, setStarted] = useState(false);
   useEffect(() => {
     return () => {
       // Cleanup when the component unmounts
@@ -40,72 +41,84 @@ const App = () => {
   }, [videoStream]);
 
   const startRecording = async () => {
+    setStarted(true);
     try {
+      const countdownInterval = setInterval(() => {
+        setCountdown((prevCountdown) => prevCountdown - 1);
+      }, 1000);
+
       let question = questions[Math.floor(Math.random() * questions.length)];
       setQuestion(question);
-      const constraints = { video: true, audio: true };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      setVideoStream(stream);
 
-      const recorder = new MediaRecorder(stream);
-      const recordedChunks = [];
+      setTimeout(async () => {
+        clearInterval(countdownInterval);
+        const constraints = { video: true, audio: true };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        setVideoStream(stream);
 
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          recordedChunks.push(event.data);
+        const recorder = new MediaRecorder(stream);
+        const recordedChunks = [];
+
+        recorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        };
+
+        recorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: "video/mp4" });
+
+          // Generate file name based on current date and time
+          const now = new Date();
+          const fileName = `confession_${now
+            .toISOString()
+            .replace(/[:.]/g, "-")}.mp4`;
+
+          // Save video
+          saveBlobAsFile(blob, fileName);
+
+          // Generate and save SRT file
+          const srtContent = `1\n00:00:00,000 --> 00:00:10,000\n${question}`;
+
+          const srtBlob = new Blob([srtContent], { type: "text/srt" });
+          const srtFileName = `confession_${now
+            .toISOString()
+            .replace(/[:.]/g, "-")}.srt`;
+
+          saveBlobAsFile(srtBlob, srtFileName);
+
+          if (videoStream) {
+            videoStream.getTracks().forEach((track) => track.stop());
+          }
+          setQuestion(null);
+          setCountdown(10);
+        };
+
+        setMediaRecorder(recorder);
+
+        // Assign the stream to the video element
+        const videoElement = document.getElementById("video");
+        if ("srcObject" in videoElement) {
+          videoElement.srcObject = stream;
+        } else {
+          // For older browsers that don't support srcObject
+          videoElement.src = URL.createObjectURL(stream);
         }
-      };
 
-      recorder.onstop = () => {
-        const blob = new Blob(recordedChunks, { type: "video/mp4" });
+        // Mute the video
+        videoElement.muted = true;
 
-        // Generate file name based on current date and time
-        const now = new Date();
-        const fileName = `confession_${now
-          .toISOString()
-          .replace(/[:.]/g, "-")}.mp4`;
+        recorder.start();
 
-        // Save video
-        saveBlobAsFile(blob, fileName);
+        setRecording(true);
 
-        // Generate and save SRT file
-        const srtContent = `1\n00:00:00,000 --> 00:00:10,000\n${question}`;
-
-        const srtBlob = new Blob([srtContent], { type: "text/srt" });
-        const srtFileName = `confession_${now
-          .toISOString()
-          .replace(/[:.]/g, "-")}.srt`;
-
-        saveBlobAsFile(srtBlob, srtFileName);
-
-        if (videoStream) {
-          videoStream.getTracks().forEach((track) => track.stop());
-        }
-        setQuestion(null);
-      };
-
-      setMediaRecorder(recorder);
-
-      // Assign the stream to the video element
-      const videoElement = document.getElementById("video");
-      if ("srcObject" in videoElement) {
-        videoElement.srcObject = stream;
-      } else {
-        // For older browsers that don't support srcObject
-        videoElement.src = URL.createObjectURL(stream);
-      }
-
-      // Mute the video
-      videoElement.muted = true;
-
-      recorder.start();
-
-      setRecording(true);
-
-      setTimeout(() => {
-        recorder.stop();
-        setRecording(false);
-      }, 15000); // Record for 15 seconds
+        setTimeout(() => {
+          recorder.stop();
+          setRecording(false);
+          videoElement.srcObject = null;
+          setStarted(false);
+        }, 15000); // Record for 15 seconds
+      }, 10000); // Wait for 10 seconds
     } catch (error) {
       console.error("Error accessing webcam:", error);
     }
@@ -155,6 +168,10 @@ const App = () => {
         >
           <h3>Sponset av</h3>
           <img src="spritjakt.png" height={"30px"} />
+          <h3>og</h3>
+          <a href="https://erdetfesthosmatsikveld.no">
+            erdetfesthosmatsikveld.no
+          </a>
         </div>
 
         {recording && (
@@ -204,21 +221,39 @@ const App = () => {
           zIndex: 2, // Higher zIndex to ensure it's on top of the video
         }}
       >
-        {!recording && (
-          <button
-            onClick={startRecording}
+        {started && countdown > 0 && (
+          <div
             style={{
-              cursor: "pointer",
-              padding: "10px 20px",
-              fontSize: "16px",
-              borderRadius: "10px",
-              border: "none",
-              color: "#000",
-              outline: "none",
+              position: "absolute",
+              top: "40%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              fontSize: "48px",
+              color: "#fff",
+              zIndex: 4, // Higher zIndex to ensure it's on top of the video
             }}
           >
-            {"Jeg er klar"}
-          </button>
+            {countdown}
+          </div>
+        )}
+        {!started && (
+          <div>
+            <h3>Svar så ærlig du kan på spørsmålet som kommer</h3>
+            <button
+              onClick={startRecording}
+              style={{
+                cursor: "pointer",
+                padding: "10px 20px",
+                fontSize: "16px",
+                borderRadius: "10px",
+                border: "none",
+                color: "#000",
+                outline: "none",
+              }}
+            >
+              {"Jeg er klar"}
+            </button>
+          </div>
         )}
       </div>
     </div>
