@@ -99,7 +99,7 @@ const App = () => {
 
           // Generate file name based on current date and time
           const now = new Date();
-          const fileName = `confession_${now
+          const fileName = `vitneboksen_${now
             .toISOString()
             .replace(/[:.]/g, "-")}.webm`;
 
@@ -107,10 +107,10 @@ const App = () => {
           saveBlobAsFile(blob, fileName);
 
           // Generate and save SRT file
-          const srtContent = `1\n00:00:00,000 --> 00:00:10,000\n${question}`;
+          const srtContent = `1\n00:00:00,000 --> 00:00:10,000\n${currentQuestion}`;
 
           const srtBlob = new Blob([srtContent], { type: "text/srt" });
-          const srtFileName = `confession_${now
+          const srtFileName = `vitneboksen_${now
             .toISOString()
             .replace(/[:.]/g, "-")}.srt`;
 
