@@ -436,7 +436,7 @@ const App = () => {
           position: "fixed",
           display: "flex",
           bottom: "0",
-          left: "10%",
+          left: "5%",
           alignItems: "baseline",
           alignContent: "baseline",
           gap: "10px",
@@ -444,7 +444,7 @@ const App = () => {
       >
         Sponset av
         <a href="https://spritjakt.no">
-          <img src="spritjakt.png" alt="spritjakt logo" height={"30px"} />
+          <img src="spritjakt.png" alt="spritjakt logo" height={"25px"} />
         </a>
         og
         <a href="https://erdetfesthosmatsikveld.no">
@@ -454,9 +454,11 @@ const App = () => {
       <p
         style={{
           position: "fixed",
-          display: "flex",
+          right: "0%",
+          left: "0%",
           bottom: "0",
-          right: "10%",
+          marginLeft: "auto",
+          marginRight: "auto",
           alignItems: "baseline",
           alignContent: "baseline",
           gap: "10px",
@@ -469,6 +471,26 @@ const App = () => {
           href="https://no.linkedin.com/in/mats-l%C3%B8vstrand-berntsen-4682b2142"
         >
           Mats Løvstrand Berntsen
+        </a>
+      </p>
+      <p
+        style={{
+          position: "fixed",
+          display: "flex",
+          bottom: "0",
+          right: "5%",
+          alignItems: "baseline",
+          alignContent: "baseline",
+          gap: "10px",
+        }}
+      >
+        Kildekoden finner du på
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://github.com/matslb/vitneboksen"
+        >
+          Github
         </a>
       </p>
     </div>
