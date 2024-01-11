@@ -309,7 +309,7 @@ const App = () => {
             >
               Vitneboksen
             </h1>
-            <h3>Du vil få 15 sekunder til å svare på spørsmålet som dukker opp.</h3>
+            <h3>Svar på spørsmålet som dukker opp, og husk at ærlighet varer lengst</h3>
             <button
               onClick={startRecording}
               style={{
