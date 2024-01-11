@@ -2,6 +2,9 @@
 Host ditt eget realityprogram med vitneboksen
 
 ## Tips
-- Bruk Chrome og f11 for fullskjerm.
+### Opptak
+- Bruk Chrome og trykk F11 for fullskjerm.
+- Trykk "|" for å endre innstillingene eller legge til egne spørsmål.
+### Avspilling
 - Bruk VLC media player for å spille av videoene, slik at teksten kommer med.
 - Slå av visningen av filnavn ved avspilling under Tools -> Preferences -> Subtitles / OSD -> Show media title on video start.
