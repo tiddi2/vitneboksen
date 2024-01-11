@@ -239,10 +239,12 @@ const App = () => {
               left: "50%",
               transform: "translate(-50%, -50%)",
               fontSize: "48px",
+              width: "30rem",
               color: "#fff",
               zIndex: 4, // Higher zIndex to ensure it's on top of the video
             }}
           >
+            Opptaket starter om <br /> 
             {countdown}
           </div>
         )}
@@ -258,7 +260,7 @@ const App = () => {
             >
               Vitneboksen
             </h1>
-            <h3>Svar så ærlig du kan på spørsmålet som kommer</h3>
+            <h3>Du vil få 15 sekunder til å svare på spørsmålet som dukker opp.</h3>
             <button
               onClick={startRecording}
               style={{
