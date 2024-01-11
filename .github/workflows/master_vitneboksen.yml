@@ -58,5 +58,5 @@ jobs:
         with:
           app-name: 'vitneboksen'
           slot-name: 'Production'
-          package: .
+          package: ./build
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2BD8A80AD9C5416D8B75C92599A87E34 }}
