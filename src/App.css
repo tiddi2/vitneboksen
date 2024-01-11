@@ -14,17 +14,18 @@ html {
   background-color: #1c323a;
 }
 
-div{
+div {
   border-radius: 6px;
 }
-input{
+input {
   color: black;
   width: 3rem;
   text-align: left;
-  align-self: flex-end;
 }
 
-label{
-  display: block;
+.settings label {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  text-align: left;
   justify-content: space-between;
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css"; // Import the CSS file
 
-const questions = [
+const defaultQuestions = [
   "Hvordan føler du deg i dag etter dagens hendelser?",
   "Hvem stoler du mest på i huset/feriestedet, og hvorfor?",
   "Hva synes du om de siste konfliktene eller diskusjonene som har oppstått?",
@@ -9,34 +9,43 @@ const questions = [
   "Er det noen spesiell person du føler deg nærmere nå sammenlignet med tidligere?",
   "Hvem i gruppen tror du er den største konkurrenten din, og hvorfor?",
   "Har du noen strategier for å komme lenger i konkurransen/få en partner?",
-  "Hvordan takler du stress eller presset fra å være i en konstant overvåket situasjon?",
   "Hvordan har opplevelsen så langt påvirket dine personlige relasjoner og vennskap i gruppen?",
   "Hva er din største frykt eller bekymring for tiden?",
-  "Hvordan tror du andre deltakere oppfatter deg, og er det noe du ønsker å endre ved det?",
-  "Er det noen romantiske følelser som utvikler seg mellom deg og andre deltakere?",
-  "Hvordan har du tilpasset deg livet i huset/feriestedet sammenlignet med dine forventninger før du kom hit?",
   "Hvem synes du har endret seg mest siden starten av programmet, og hvorfor?",
   "Hva savner du mest fra livet utenfor realityprogrammet?",
   "Hvordan takler du følelsen av isolasjon eller mangel på personvern?",
   "Er det noen personlige mål eller opplevelser du ønsker å oppnå mens du er her?",
   "Hvordan påvirker konkurransen din oppfatning av andre deltakere?",
-  "Hvilke personlige egenskaper tror du gjør deg til en sterk konkurrent i dette spillet?",
   "Hvordan tror du du vil se tilbake på denne opplevelsen når den er over?",
 ];
-
 
 const App = () => {
   const [videoStream, setVideoStream] = useState(null);
   const [recording, setRecording] = useState(false);
   const [question, setQuestion] = useState(null);
+  const [questions, setQuestions] = useState([]);
+  const [questionsRawString, setQuestionsRawString] = useState();
   const [countdown, setCountdown] = useState();
   const [started, setStarted] = useState(false);
   const [waiting, setWaiting] = useState(false);
-  
+
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [countdownTime, setCountdownTime] = useState(3000);
   const [recordTime, setRecordTime] = useState(15000);
   const [waitTime, setWaitTime] = useState(30000);
+
+  useEffect(() => {
+    document.addEventListener("keypress", handleKeyPress);
+    setQuestions(
+      JSON.parse(localStorage.getItem("questions")) || defaultQuestions
+    );
+    setCountdownTime(JSON.parse(localStorage.getItem("countdownTime")) || 3000);
+    setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 15000);
+    setWaitTime(JSON.parse(localStorage.getItem("waitTime")) || 30000);
+    setQuestionsRawString(
+      JSON.parse(localStorage.getItem("questionsRawString"))
+    );
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -49,15 +58,15 @@ const App = () => {
 
   const startRecording = async () => {
     setStarted(true);
-    setCountdown(countdownTime/1000);
+    setCountdown(countdownTime / 1000);
     try {
       let countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
       }, 1000);
 
-      let question = questions[Math.floor(Math.random() * questions.length)];
-      setQuestion(question);
-
+      let currentQuestion =
+        questions[(questions.indexOf(question) || 0) + 1] || questions[0];
+      setQuestion(currentQuestion);
       setTimeout(async () => {
         clearInterval(countdownInterval);
         const constraints = {
@@ -110,9 +119,7 @@ const App = () => {
           if (videoStream) {
             videoStream.getTracks().forEach((track) => track.stop());
           }
-          setQuestion(null);
         };
-
 
         // Assign the stream to the video element
         const videoElement = document.getElementById("video");
@@ -129,32 +136,31 @@ const App = () => {
         recorder.start();
 
         setRecording(true);
-        setCountdown(recordTime/1000);
+        setCountdown(recordTime / 1000);
 
         countdownInterval = setInterval(() => {
           setCountdown((prevCountdown) => prevCountdown - 1);
         }, 1000);
-  
+
         setTimeout(() => {
           clearInterval(countdownInterval);
           recorder.stop();
           setRecording(false);
           setWaiting(true);
           videoElement.srcObject = null;
-          
-          setCountdown(waitTime/1000);
+
+          setCountdown(waitTime / 1000);
 
           countdownInterval = setInterval(() => {
             setCountdown((prevCountdown) => prevCountdown - 1);
           }, 1000);
-          
+
           setTimeout(() => {
             clearInterval(countdownInterval);
-              setWaiting(false);
-              setStarted(false);
+            setWaiting(false);
+            setStarted(false);
           }, waitTime); //wait
-
-        }, recordTime); // Record 
+        }, recordTime); // Record
       }, countdownTime); // Countdown
     } catch (error) {
       console.error("Error accessing webcam:", error);
@@ -174,14 +180,33 @@ const App = () => {
   };
 
   const handleKeyPress = (event) => {
-    if (event.key === "s" || event.key === "S") {
-      setSettingsOpen(prev => !prev);
+    if (event.key === "|") {
+      setSettingsOpen((prev) => !prev);
     }
   };
 
-  useEffect(() => {
-    document.addEventListener("keypress", handleKeyPress);
-  }, []);
+  const handleTextareaChange = (event) => {
+    const inputString = event.target.value;
+    const newArray = parseNewlineSeparatedList(inputString);
+    if (newArray.length > 0) {
+      setQuestions(newArray);
+    } else {
+      setQuestions(defaultQuestions);
+    }
+
+    localStorage.setItem("questions", JSON.stringify(newArray));
+    setQuestionsRawString(inputString);
+    localStorage.setItem("questionsRawString", JSON.stringify(inputString));
+  };
+
+  const parseNewlineSeparatedList = (inputString) => {
+    const arrayOfStrings = inputString.split("\n");
+    const trimmedArray = arrayOfStrings
+      ?.map((str) => str.trim())
+      .filter((str) => str !== "");
+    console.log(trimmedArray);
+    return trimmedArray;
+  };
 
   return (
     <div
@@ -191,7 +216,9 @@ const App = () => {
         position: "fixed",
       }}
     >
-      <h1 style={{ margin: "1rem", textAlign: "center" }}>{question}</h1>
+      <h1 style={{ margin: "1rem", textAlign: "center" }}>
+        {started && !waiting && question}
+      </h1>
       <div
         style={{
           position: "relative",
@@ -247,15 +274,16 @@ const App = () => {
         )}
         {recording && countdown > 0 && (
           <div
-          style={{
-            position: "absolute",
-            top: "2%",
-            right: "2%",
-            fontSize: "2rem",
-            display: "flex",
-            background: "rgba(0,0,0,0.3)",
-            padding: "1rem",
-          }}>
+            style={{
+              position: "absolute",
+              top: "2%",
+              right: "2%",
+              fontSize: "2rem",
+              display: "flex",
+              background: "rgba(0,0,0,0.3)",
+              padding: "1rem",
+            }}
+          >
             {countdown}
           </div>
         )}
@@ -293,8 +321,7 @@ const App = () => {
               zIndex: 4, // Higher zIndex to ensure it's on top of the video
             }}
           >
-            Opptaket starter om <br /> 
-            {countdown}
+            Opptaket starter om {countdown} sekunder
           </div>
         )}
         {!started && (
@@ -309,7 +336,10 @@ const App = () => {
             >
               Vitneboksen
             </h1>
-            <h3>Svar på spørsmålet som dukker opp, og husk at ærlighet varer lengst</h3>
+            <h3>
+              Svar på spørsmålet som dukker opp, og husk at ærlighet varer
+              lengst
+            </h3>
             <button
               onClick={startRecording}
               style={{
@@ -327,7 +357,7 @@ const App = () => {
           </div>
         )}
         {waiting && (
-            <div
+          <div
             style={{
               position: "absolute",
               top: "40%",
@@ -340,57 +370,82 @@ const App = () => {
             }}
           >
             <h2>Takk for ditt bidrag</h2>
-             <br /> 
+            <br />
             Vitneboksen åpner igjen om {countdown} sekunder
           </div>
         )}
       </div>
 
       {settingsOpen && (
-      <div
-        style={{
-          position: "fixed",
-          top: "5%",
-          right: "5%",
-          background: "rgba(25, 25, 25, 1)",
-          boxShadow:"1px 1px 4px black",
-          padding: "20px",
-          borderRadius: "10px",
-          display: "flex",
-          gap: ".5rem",
-          alignItems: "baseLine",
-          flexDirection: "column",
-          zIndex: 5,
-        }}
-      >
-        <label>
-          Ventetid før opptak:
-          <input
-            type="number"
-            value={countdownTime/1000}
-            onChange={(e) => setCountdownTime(parseInt(e.target.value, 10)*1000)}
+        <div
+          className="settings"
+          style={{
+            position: "fixed",
+            top: "5%",
+            right: "5%",
+            background: "rgba(25, 25, 25, 1)",
+            boxShadow: "1px 1px 4px black",
+            padding: "20px",
+            borderRadius: "10px",
+            display: "flex",
+            gap: ".5rem",
+            alignItems: "baseLine",
+            flexDirection: "column",
+            zIndex: 5,
+          }}
+        >
+          <label>
+            Ventetid før opptak:
+            <input
+              type="number"
+              value={countdownTime / 1000}
+              onChange={(e) => {
+                let value = parseInt(e.target.value, 10) * 1000;
+                setCountdownTime(value);
+                localStorage.setItem("countdownTime", value);
+              }}
+            />
+          </label>
+          <br />
+          <label>
+            Opptakstid:
+            <input
+              type="number"
+              value={recordTime / 1000}
+              onChange={(e) => {
+                let value = parseInt(e.target.value, 10) * 1000;
+                setRecordTime(value);
+                localStorage.setItem("recordTime", value);
+              }}
+            />
+          </label>
+          <br />
+          <label>
+            Ventetid etter opptak:
+            <input
+              type="number"
+              value={waitTime / 1000}
+              onChange={(e) => {
+                let value = parseInt(e.target.value, 10) * 1000;
+                setWaitTime(value);
+                localStorage.setItem("waitTime", value);
+              }}
+            />
+          </label>
+          <br />
+          Spørsmål (ett per linje)
+          <textarea
+            onChange={handleTextareaChange}
+            value={questionsRawString}
+            style={{
+              width: "100%",
+              minHeight: "5rem",
+              color: "black",
+              textAlign: "left",
+            }}
           />
-        </label>
-        <br />
-        <label>
-          Opptakstid:
-          <input
-            type="number"
-            value={recordTime/1000}
-            onChange={(e) => setRecordTime(parseInt(e.target.value, 10)*1000)}
-          />
-        </label>
-        <br />
-        <label>
-          Ventetid etter opptak:
-          <input
-            type="number"
-            value={waitTime/1000}
-            onChange={(e) => setWaitTime(parseInt(e.target.value, 10)*1000)}
-          />
-        </label>
-      </div>
-    )}
+        </div>
+      )}
     </div>
   );
 };
