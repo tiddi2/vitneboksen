@@ -175,7 +175,7 @@ const App = () => {
           }}
         >
           <h3>Sponset av</h3>
-          <img src="spritjakt.png" height={"30px"} />
+          <img src="spritjakt.png" alt="spritjakt logo" height={"30px"} />
           <h3>og</h3>
           <a href="https://erdetfesthosmatsikveld.no">
             erdetfesthosmatsikveld.no
