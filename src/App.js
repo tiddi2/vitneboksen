@@ -38,7 +38,9 @@ const App = () => {
     document.addEventListener("keypress", handleKeyPress);
     const customQuestions = JSON.parse(localStorage.getItem("questions"));
     setQuestions(
-      customQuestions === undefined || customQuestions.length === 0
+      customQuestions === undefined ||
+        customQuestions === null ||
+        customQuestions?.length === 0
         ? defaultQuestions
         : customQuestions
     );
