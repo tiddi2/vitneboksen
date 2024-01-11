@@ -81,7 +81,7 @@ const App = () => {
         setVideoStream(stream);
 
         const recorder = new MediaRecorder(stream, {
-          mimeType: "video/webm;codecs=vp9",
+          mimeType: "video/webm",
         });
 
         const recordedChunks = [];
@@ -94,7 +94,7 @@ const App = () => {
 
         recorder.onstop = () => {
           const blob = new Blob(recordedChunks, {
-            type: "video/webm;codecs=vp9",
+            type: "video/webm",
           });
 
           // Generate file name based on current date and time
