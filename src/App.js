@@ -36,8 +36,11 @@ const App = () => {
 
   useEffect(() => {
     document.addEventListener("keypress", handleKeyPress);
+    const customQuestions = JSON.parse(localStorage.getItem("questions"));
     setQuestions(
-      JSON.parse(localStorage.getItem("questions")) || defaultQuestions
+      customQuestions == undefined || customQuestions.length === 0
+        ? defaultQuestions
+        : customQuestions
     );
     setCountdownTime(JSON.parse(localStorage.getItem("countdownTime")) || 3000);
     setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 15000);
