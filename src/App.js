@@ -24,12 +24,20 @@ const questions = [
   "Hvordan tror du du vil se tilbake på denne opplevelsen når den er over?",
 ];
 
+
 const App = () => {
   const [videoStream, setVideoStream] = useState(null);
   const [recording, setRecording] = useState(false);
   const [question, setQuestion] = useState(null);
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState();
   const [started, setStarted] = useState(false);
+  const [waiting, setWaiting] = useState(false);
+  
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [countdownTime, setCountdownTime] = useState(3000);
+  const [recordTime, setRecordTime] = useState(15000);
+  const [waitTime, setWaitTime] = useState(30000);
+
   useEffect(() => {
     return () => {
       // Cleanup when the component unmounts
@@ -41,8 +49,9 @@ const App = () => {
 
   const startRecording = async () => {
     setStarted(true);
+    setCountdown(countdownTime/1000);
     try {
-      const countdownInterval = setInterval(() => {
+      let countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
       }, 1000);
 
@@ -102,7 +111,6 @@ const App = () => {
             videoStream.getTracks().forEach((track) => track.stop());
           }
           setQuestion(null);
-          setCountdown(10);
         };
 
 
@@ -121,14 +129,33 @@ const App = () => {
         recorder.start();
 
         setRecording(true);
+        setCountdown(recordTime/1000);
 
+        countdownInterval = setInterval(() => {
+          setCountdown((prevCountdown) => prevCountdown - 1);
+        }, 1000);
+  
         setTimeout(() => {
+          clearInterval(countdownInterval);
           recorder.stop();
           setRecording(false);
+          setWaiting(true);
           videoElement.srcObject = null;
-          setStarted(false);
-        }, 15000); // Record for 15 seconds
-      }, 10000); // Wait for 10 seconds
+          
+          setCountdown(waitTime/1000);
+
+          countdownInterval = setInterval(() => {
+            setCountdown((prevCountdown) => prevCountdown - 1);
+          }, 1000);
+          
+          setTimeout(() => {
+            clearInterval(countdownInterval);
+              setWaiting(false);
+              setStarted(false);
+          }, waitTime); //wait
+
+        }, recordTime); // Record 
+      }, countdownTime); // Countdown
     } catch (error) {
       console.error("Error accessing webcam:", error);
     }
@@ -145,6 +172,16 @@ const App = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  const handleKeyPress = (event) => {
+    if (event.key === "s" || event.key === "S") {
+      setSettingsOpen(prev => !prev);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keypress", handleKeyPress);
+  }, []);
 
   return (
     <div
@@ -208,6 +245,20 @@ const App = () => {
             <div style={{ color: "white" }}>REC</div>
           </div>
         )}
+        {recording && countdown > 0 && (
+          <div
+          style={{
+            position: "absolute",
+            top: "2%",
+            right: "2%",
+            fontSize: "2rem",
+            display: "flex",
+            background: "rgba(0,0,0,0.3)",
+            padding: "1rem",
+          }}>
+            {countdown}
+          </div>
+        )}
         <video
           id="video"
           style={{
@@ -229,14 +280,14 @@ const App = () => {
           zIndex: 2, // Higher zIndex to ensure it's on top of the video
         }}
       >
-        {started && countdown > 0 && (
+        {started && !waiting && !recording && countdown > 0 && (
           <div
             style={{
               position: "absolute",
               top: "40%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              fontSize: "48px",
+              fontSize: "1.6rem",
               width: "30rem",
               color: "#fff",
               zIndex: 4, // Higher zIndex to ensure it's on top of the video
@@ -275,7 +326,71 @@ const App = () => {
             </button>
           </div>
         )}
+        {waiting && (
+            <div
+            style={{
+              position: "absolute",
+              top: "40%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              fontSize: "1.6rem",
+              width: "30rem",
+              color: "#fff",
+              zIndex: 4, // Higher zIndex to ensure it's on top of the video
+            }}
+          >
+            <h2>Takk for ditt bidrag</h2>
+             <br /> 
+            Vitneboksen åpner igjen om {countdown} sekunder
+          </div>
+        )}
       </div>
+
+      {settingsOpen && (
+      <div
+        style={{
+          position: "fixed",
+          top: "5%",
+          right: "5%",
+          background: "rgba(25, 25, 25, 1)",
+          boxShadow:"1px 1px 4px black",
+          padding: "20px",
+          borderRadius: "10px",
+          display: "flex",
+          gap: ".5rem",
+          alignItems: "baseLine",
+          flexDirection: "column",
+          zIndex: 5,
+        }}
+      >
+        <label>
+          Ventetid før opptak:
+          <input
+            type="number"
+            value={countdownTime/1000}
+            onChange={(e) => setCountdownTime(parseInt(e.target.value, 10)*1000)}
+          />
+        </label>
+        <br />
+        <label>
+          Opptakstid:
+          <input
+            type="number"
+            value={recordTime/1000}
+            onChange={(e) => setRecordTime(parseInt(e.target.value, 10)*1000)}
+          />
+        </label>
+        <br />
+        <label>
+          Ventetid etter opptak:
+          <input
+            type="number"
+            value={waitTime/1000}
+            onChange={(e) => setWaitTime(parseInt(e.target.value, 10)*1000)}
+          />
+        </label>
+      </div>
+    )}
     </div>
   );
 };
