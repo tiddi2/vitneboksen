@@ -26,7 +26,6 @@ const questions = [
 
 const App = () => {
   const [videoStream, setVideoStream] = useState(null);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
   const [recording, setRecording] = useState(false);
   const [question, setQuestion] = useState(null);
   const [countdown, setCountdown] = useState(10);
@@ -106,7 +105,6 @@ const App = () => {
           setCountdown(10);
         };
 
-        setMediaRecorder(recorder);
 
         // Assign the stream to the video element
         const videoElement = document.getElementById("video");
