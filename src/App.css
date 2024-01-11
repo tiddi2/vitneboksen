@@ -13,3 +13,18 @@ button {
 html {
   background-color: #1c323a;
 }
+
+div{
+  border-radius: 6px;
+}
+input{
+  color: black;
+  width: 3rem;
+  text-align: left;
+  align-self: flex-end;
+}
+
+label{
+  display: block;
+  justify-content: space-between;
+}
