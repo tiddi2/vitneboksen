@@ -231,26 +231,6 @@ const App = () => {
           height: "90%", // Adjusted height to make space for buttons
         }}
       >
-        <div
-          style={{
-            position: "fixed",
-            display: "flex",
-            bottom: "0",
-            alignItems: "baseline",
-            alignContent: "baseline",
-            gap: "10px",
-          }}
-        >
-          <h3>Sponset av</h3>
-          <a href="https://spritjakt.no">
-            <img src="spritjakt.png" alt="spritjakt logo" height={"30px"} />
-          </a>
-          <h3>og</h3>
-          <a href="https://erdetfesthosmatsikveld.no">
-            erdetfesthosmatsikveld.no
-          </a>
-        </div>
-
         {recording && (
           <div
             style={{
@@ -451,6 +431,46 @@ const App = () => {
           />
         </div>
       )}
+      <p
+        style={{
+          position: "fixed",
+          display: "flex",
+          bottom: "0",
+          left: "10%",
+          alignItems: "baseline",
+          alignContent: "baseline",
+          gap: "10px",
+        }}
+      >
+        Sponset av
+        <a href="https://spritjakt.no">
+          <img src="spritjakt.png" alt="spritjakt logo" height={"30px"} />
+        </a>
+        og
+        <a href="https://erdetfesthosmatsikveld.no">
+          erdetfesthosmatsikveld.no
+        </a>
+      </p>
+      <p
+        style={{
+          position: "fixed",
+          display: "flex",
+          bottom: "0",
+          right: "10%",
+          alignItems: "baseline",
+          alignContent: "baseline",
+          gap: "10px",
+        }}
+      >
+        © 2024{" "}
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://no.linkedin.com/in/mats-l%C3%B8vstrand-berntsen-4682b2142"
+        >
+          Mats Løvstrand Berntsen
+        </a>
+      </p>
     </div>
   );
 };
