@@ -42,9 +42,6 @@ const Home = () => {
   const [waitTime, setWaitTime] = useState(30000);
 
   useEffect(() => {
-    let parsed = queryString.parse(window.location.search);
-    if (parsed?.session) {
-    }
     document.addEventListener("keypress", handleKeyPress);
     const customQuestions = JSON.parse(localStorage.getItem("questions"));
     setQuestions(
@@ -65,12 +62,12 @@ const Home = () => {
   }, []);
 
   const CreateSession = async () => {
-    var { sharedKey, sessionKey } = await createSession(sessionKey);
-    if (sharedKey) {
-      setSharedKey(sharedKey);
-      setSessionKey(sessionKey);
-      localStorage.setItem("sessionKey", sessionKey);
-      localStorage.setItem("sharedKey", sharedKey);
+    var { newSharedKey, newSessionKey } = await createSession(sessionKey);
+    if (newSessionKey) {
+      setSharedKey(newSharedKey);
+      setSessionKey(newSessionKey);
+      localStorage.setItem("sessionKey", newSessionKey);
+      localStorage.setItem("sharedKey", newSharedKey);
     }
   };
 
@@ -120,7 +117,7 @@ const Home = () => {
         };
 
         recorder.onstop = async () => {
-          const blob = new Blob(recordedChunks, {
+          const videoBlob = new Blob(recordedChunks, {
             type: "video/webm",
           });
 
@@ -130,11 +127,6 @@ const Home = () => {
             .toISOString()
             .replace(/[:.]/g, "-")}.webm`;
 
-          // upload vide
-          await uploadTestemony(sessionKey, blob, fileName);
-          // Save video
-          saveBlobAsFile(blob, fileName);
-
           // Generate and save SRT file
           const srtContent = `1\n00:00:00,000 --> 00:00:10,000\n${currentQuestion}`;
 
@@ -143,7 +135,20 @@ const Home = () => {
             .toISOString()
             .replace(/[:.]/g, "-")}.srt`;
 
-          saveBlobAsFile(srtBlob, srtFileName);
+          // Save video
+          if (!sessionKey) {
+            saveBlobAsFile(videoBlob, fileName);
+            saveBlobAsFile(srtBlob, srtFileName);
+          } else {
+            // upload vide
+            await uploadTestemony(
+              sessionKey,
+              videoBlob,
+              fileName,
+              srtBlob,
+              srtFileName
+            );
+          }
 
           if (videoStream) {
             videoStream.getTracks().forEach((track) => track.stop());

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import queryString from "query-string";
 import Home from "./components/Home/home";
-import Contribute from "./components/Contribute/contribute";
 import "./App.css";
+import ActionShot from "./components/ActionShot/actionShot";
 
 const App = () => {
   const [sessionId, setSessionId] = useState(null);
@@ -16,7 +16,7 @@ const App = () => {
 
   return (
     <div>
-      {sessionId ? <Contribute /> : <Home />}
+      {sessionId ? <ActionShot /> : <Home />}
       <p
         style={{
           position: "fixed",

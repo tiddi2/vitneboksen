@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Vitneboksen_func
 {
-    public static class UploadVideo
+    public static class UploadTestemony
     {
         [FunctionName("upload-testemony")]
         public static async Task<IActionResult> Run(
@@ -22,11 +22,13 @@ namespace Vitneboksen_func
             string sessionKey = req.Query["sessionKey"];
 
             var formdata = await req.ReadFormAsync();
-            var file = req.Form.Files.FirstOrDefault();
-            if (file == null)
+            var videoFile = req.Form.Files.FirstOrDefault(f => f.Name == "video");
+            var subFile = req.Form.Files.FirstOrDefault(f => f.Name == "sub");
+            if (videoFile == null || subFile == null)
             {
                 return new BadRequestObjectResult("No file, stupid.");
             }
+
             var constring = Environment.GetEnvironmentVariable("StorageConnectionString");
             var blobService = new BlobServiceClient(constring);
 
@@ -40,13 +42,10 @@ namespace Vitneboksen_func
 
             var containerClient = blobService.GetBlobContainerClient(container.Name);
 
-            var res = await containerClient.UploadBlobAsync(file.FileName, file.OpenReadStream());
+            await containerClient.UploadBlobAsync(videoFile.FileName, videoFile.OpenReadStream());
+            await containerClient.UploadBlobAsync(subFile.FileName, subFile.OpenReadStream());
 
-            string responseMessage = string.IsNullOrEmpty(sessionKey)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {sessionKey}. This HTTP triggered function executed successfully.";
-
-            return new OkObjectResult(responseMessage);
+            return new OkObjectResult("Ok");
         }
 
     }

@@ -6,6 +6,7 @@ function generateKey() {
   });
 }
 const apiUrl = "https://vitneboksenfunc20240113125528.azurewebsites.net/api/";
+//const apiUrl = "http://localhost:7052/api/";
 
 // Function to make the GET request
 export async function createSession(existingSessionKey) {
@@ -42,22 +43,40 @@ export async function createSession(existingSessionKey) {
   }
 }
 
-export async function uploadTestemony(sessionKey, videofile, fileName) {
+export async function uploadTestemony(
+  sessionKey,
+  videofile,
+  videoName,
+  subfile,
+  subName
+) {
   const urlWithQueryParam = `${apiUrl}upload-testemony?sessionKey=${sessionKey}`;
 
-  try {
-    const formData = new FormData();
-    formData.append("video", videofile, fileName);
+  const formData = new FormData();
+  formData.append("video", videofile, videoName);
+  formData.append("sub", subfile, subName);
+  await uploadFile(urlWithQueryParam, formData);
+}
 
-    const response = await fetch(urlWithQueryParam, {
+export async function uploadActionShot(sharedKey, videofile, videoName) {
+  const urlWithQueryParam = `${apiUrl}upload-actionshot?sharedKey=${sharedKey}`;
+
+  const formData = new FormData();
+  formData.append("video", videofile, videoName);
+  await uploadFile(urlWithQueryParam, formData);
+}
+
+async function uploadFile(url, formData) {
+  try {
+    const response = await fetch(url, {
       method: "POST",
       body: formData,
     });
 
     if (response.ok) {
-      console.log("Video successfully uploaded");
+      console.log("file successfully uploaded");
     } else {
-      console.error("Failed to upload video");
+      console.error("Failed to upload file");
     }
   } catch (error) {
     console.error("Error:", error);
