@@ -126,7 +126,6 @@ const ActionShot = () => {
         position: "fixed",
       }}
     >
-      <h1 style={{ margin: "1rem", textAlign: "center" }}>Filmer til fest!</h1>
       <div
         style={{
           position: "relative",

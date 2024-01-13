@@ -28,3 +28,11 @@ button {
   text-align: left;
   justify-content: space-between;
 }
+
+@media (max-width: 768px) {
+  .footer {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+}
