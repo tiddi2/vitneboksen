@@ -232,6 +232,7 @@ const ActionShot = () => {
               transform: "translate(-50%, -50%)",
               fontSize: "1.6rem",
               width: "30rem",
+              maxWidth: "90%",
               color: "#fff",
               zIndex: 4, // Higher zIndex to ensure it's on top of the video
             }}
