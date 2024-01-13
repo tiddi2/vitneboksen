@@ -4,7 +4,6 @@ import {
   uploadTestemony,
 } from "../../Services/vitneboksService";
 import "./home.css";
-import { GetVideoConfig } from "../../Services/mediaService";
 
 const defaultQuestions = [
   "Hvordan føler du deg i dag etter dagens hendelser?",
