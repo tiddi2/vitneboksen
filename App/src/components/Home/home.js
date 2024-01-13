@@ -104,7 +104,7 @@ const Home = () => {
         setVideoStream(stream);
 
         const recorder = new MediaRecorder(stream, {
-          mimeType: "video/webm",
+          mimeType: "video/mp4",
         });
 
         const recordedChunks = [];
@@ -117,14 +117,14 @@ const Home = () => {
 
         recorder.onstop = async () => {
           const videoBlob = new Blob(recordedChunks, {
-            type: "video/webm",
+            type: "video/mp4",
           });
 
           // Generate file name based on current date and time
           const now = new Date();
           const fileName = `vitneboksen_${now
             .toISOString()
-            .replace(/[:.]/g, "-")}.webm`;
+            .replace(/[:.]/g, "-")}.mp4`;
 
           // Generate and save SRT file
           const srtContent = `1\n00:00:00,000 --> 00:00:10,000\n${currentQuestion}`;
