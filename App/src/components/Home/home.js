@@ -486,6 +486,14 @@ const Home = () => {
                   disabled={true}
                 />
               </label>
+              <label>
+                Videoer:
+                <a
+                  href={`https://vitneboksenfunc20240113125528.azurewebsites.net/api/download-session-files?sessionKey=${sessionKey}`}
+                >
+                  Last ned
+                </a>
+              </label>
             </div>
           )}
         </div>

@@ -11,15 +11,16 @@ const ActionShot = () => {
   const [waiting, setWaiting] = useState(false);
   const [recordTime, setRecordTime] = useState(15000);
   const [waitTime, setWaitTime] = useState(30000);
+  const [countdownTime, setCountdownTime] = useState(3000);
 
   useEffect(() => {
     let parsed = queryString.parse(window.location.search);
     if (parsed?.session) {
       setSharedKey(parsed.session);
     }
-
-    setRecordTime(5000);
-    setWaitTime(30000);
+    setCountdownTime(JSON.parse(localStorage.getItem("countdownTime")) || 3000);
+    setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 15000);
+    setWaitTime(JSON.parse(localStorage.getItem("waitTime")) || 30000);
   }, []);
 
   useEffect(() => {
@@ -32,6 +33,8 @@ const ActionShot = () => {
   }, [videoStream]);
 
   const startRecording = async () => {
+    setCountdown(countdownTime / 1000);
+
     try {
       const constraints = {
         video: {
@@ -41,6 +44,9 @@ const ActionShot = () => {
         },
         audio: true,
       };
+      let countdownInterval = setInterval(() => {
+        setCountdown((prevCountdown) => prevCountdown - 1);
+      }, 1000);
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setVideoStream(stream);
 
@@ -90,6 +96,7 @@ const ActionShot = () => {
       setRecording(true);
 
       setTimeout(() => {
+        clearInterval(countdownInterval);
         recorder.stop();
         setRecording(false);
         setWaiting(true);
@@ -97,7 +104,7 @@ const ActionShot = () => {
 
         setCountdown(waitTime / 1000);
 
-        let countdownInterval = setInterval(() => {
+        countdownInterval = setInterval(() => {
           setCountdown((prevCountdown) => prevCountdown - 1);
         }, 1000);
 
@@ -155,6 +162,21 @@ const ActionShot = () => {
             <div style={{ color: "white" }}>REC</div>
           </div>
         )}
+        {recording && countdown > 0 && (
+          <div
+            style={{
+              position: "absolute",
+              top: "2%",
+              right: "2%",
+              fontSize: "2rem",
+              display: "flex",
+              background: "rgba(0,0,0,0.3)",
+              padding: "1rem",
+            }}
+          >
+            {countdown}
+          </div>
+        )}
         <video
           id="video"
           style={{
@@ -191,7 +213,7 @@ const ActionShot = () => {
                 outline: "none",
               }}
             >
-              {"Jeg er klar"}
+              Spill inn
             </button>
           </div>
         )}
