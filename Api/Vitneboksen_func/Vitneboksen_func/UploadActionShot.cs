@@ -31,15 +31,11 @@ namespace Vitneboksen_func
             var constring = Environment.GetEnvironmentVariable("StorageConnectionString");
             var blobService = new BlobServiceClient(constring);
 
-            var containers = blobService.GetBlobContainers();
-            var container = containers.FirstOrDefault(c => c.Name.EndsWith(sharedKey));
-
-            if (container == null)
+            var containerClient = Helpers.GetContainerBySharedKey(blobService, sharedKey);
+            if (containerClient == null)
             {
                 return new NotFoundObjectResult("Not found");
             }
-
-            var containerClient = blobService.GetBlobContainerClient(container.Name);
 
             await containerClient.UploadBlobAsync(videoFile.FileName, videoFile.OpenReadStream());
 

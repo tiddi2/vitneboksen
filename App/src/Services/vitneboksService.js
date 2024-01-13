@@ -5,8 +5,8 @@ function generateKey() {
     return v.toString(16);
   });
 }
-//const apiUrl = "https://vitneboksenfunc20240113125528.azurewebsites.net/api/";
-const apiUrl = "http://localhost:7052/api/";
+const apiUrl = "https://vitneboksenfunc20240113125528.azurewebsites.net/api/";
+//const apiUrl = "http://localhost:7052/api/";
 
 // Function to make the GET request
 export async function createSession(existingSessionKey) {
