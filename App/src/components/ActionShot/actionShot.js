@@ -9,18 +9,14 @@ const ActionShot = () => {
   const [countdown, setCountdown] = useState();
   const [sharedKey, setSharedKey] = useState(null);
   const [waiting, setWaiting] = useState(false);
-  const [recordTime, setRecordTime] = useState(15000);
-  const [waitTime, setWaitTime] = useState(30000);
-  const [countdownTime, setCountdownTime] = useState(3000);
+  const recordTime = 15000;
+  const waitTime = 30000;
 
   useEffect(() => {
     let parsed = queryString.parse(window.location.search);
     if (parsed?.session) {
       setSharedKey(parsed.session);
     }
-    setCountdownTime(JSON.parse(localStorage.getItem("countdownTime")) || 3000);
-    setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 15000);
-    setWaitTime(JSON.parse(localStorage.getItem("waitTime")) || 30000);
   }, []);
 
   useEffect(() => {
