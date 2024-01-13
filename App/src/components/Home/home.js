@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import queryString from "query-string";
-import { createSession } from "../../Services/vitneboksService";
+import {
+  createSession,
+  uploadTestemony,
+} from "../../Services/vitneboksService";
 import "./home.css";
 
 const defaultQuestions = [
@@ -31,6 +34,7 @@ const Home = () => {
   const [started, setStarted] = useState(false);
   const [waiting, setWaiting] = useState(false);
   const [sessionKey, setSessionKey] = useState(null);
+  const [sharedKey, setSharedKey] = useState(null);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [countdownTime, setCountdownTime] = useState(3000);
@@ -57,13 +61,16 @@ const Home = () => {
       JSON.parse(localStorage.getItem("questionsRawString")) || ""
     );
     setSessionKey(localStorage.getItem("sessionKey") || null);
+    setSharedKey(localStorage.getItem("sharedKey") || null);
   }, []);
 
   const CreateSession = async () => {
-    var guid = await createSession();
-    if (guid) {
-      setSessionKey(guid);
-      localStorage.setItem("sessionKey", guid);
+    var { sharedKey, sessionKey } = await createSession(sessionKey);
+    if (sharedKey) {
+      setSharedKey(sharedKey);
+      setSessionKey(sessionKey);
+      localStorage.setItem("sessionKey", sessionKey);
+      localStorage.setItem("sharedKey", sharedKey);
     }
   };
 
@@ -112,7 +119,7 @@ const Home = () => {
           }
         };
 
-        recorder.onstop = () => {
+        recorder.onstop = async () => {
           const blob = new Blob(recordedChunks, {
             type: "video/webm",
           });
@@ -123,6 +130,8 @@ const Home = () => {
             .toISOString()
             .replace(/[:.]/g, "-")}.webm`;
 
+          // upload vide
+          await uploadTestemony(sessionKey, blob, fileName);
           // Save video
           saveBlobAsFile(blob, fileName);
 
@@ -457,7 +466,7 @@ const Home = () => {
               Link til deling:
               <input
                 type="text"
-                value={`${window.location}?session=${sessionKey}`}
+                value={`${window.location}?session=${sharedKey}`}
                 disabled={true}
               />
             </label>

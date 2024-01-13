@@ -1,5 +1,6 @@
 namespace Vitneboksen_func
 {
+    using Azure.Storage.Blobs;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs;
@@ -19,9 +20,15 @@ namespace Vitneboksen_func
             {
                 log.LogInformation("C# HTTP trigger function processed a request.");
 
-                var sessionKey = Guid.NewGuid();
+                var sessionKey = req.Query["sessionKey"];
 
-                return new OkObjectResult(sessionKey);
+                var sharingKey = Guid.NewGuid().ToString().Substring(0, 8);
+                var constring = Environment.GetEnvironmentVariable("StorageConnectionString");
+                var blobService = new BlobServiceClient(constring);
+                var containerClient = blobService.GetBlobContainerClient($"{sessionKey}-{sharingKey}");
+                await containerClient.CreateIfNotExistsAsync();
+
+                return new OkObjectResult(sharingKey);
             }
 
         }
