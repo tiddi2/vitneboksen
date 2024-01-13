@@ -34,7 +34,7 @@ const Home = () => {
   const [waiting, setWaiting] = useState(false);
   const [sessionKey, setSessionKey] = useState(null);
   const [sharedKey, setSharedKey] = useState(null);
-
+  const [inputKey, setInputKey] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [countdownTime, setCountdownTime] = useState(3000);
   const [recordTime, setRecordTime] = useState(15000);
@@ -61,7 +61,7 @@ const Home = () => {
   }, []);
 
   const CreateSession = async () => {
-    var { newSharedKey, newSessionKey } = await createSession(sessionKey);
+    var { newSharedKey, newSessionKey } = await createSession(inputKey);
     if (newSessionKey) {
       setSharedKey(newSharedKey);
       setSessionKey(newSessionKey);
@@ -463,17 +463,30 @@ const Home = () => {
           {sessionKey == null ? (
             <label>
               Start ny session:
-              <button onClick={CreateSession}>Opprett</button>
+              <div>
+                <input
+                  type="text"
+                  value={inputKey}
+                  onChange={(e) => setInputKey(e.target.value)}
+                />
+                <button onClick={CreateSession}>Opprett</button>
+              </div>
             </label>
           ) : (
-            <label>
-              Link til deling:
-              <input
-                type="text"
-                value={`${window.location}?session=${sharedKey}`}
-                disabled={true}
-              />
-            </label>
+            <div>
+              <label>
+                Aktiv session:
+                <input type="text" value={sessionKey} disabled={true} />
+              </label>
+              <label>
+                Link til deling:
+                <input
+                  type="text"
+                  value={`${window.location}?session=${sharedKey}`}
+                  disabled={true}
+                />
+              </label>
+            </div>
           )}
         </div>
       )}
