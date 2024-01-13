@@ -4,6 +4,7 @@ import {
   uploadTestemony,
 } from "../../Services/vitneboksService";
 import "./home.css";
+import { GetVideoConfig } from "../../Services/mediaService";
 
 const defaultQuestions = [
   "Hvordan føler du deg i dag etter dagens hendelser?",
@@ -93,11 +94,7 @@ const Home = () => {
       setTimeout(async () => {
         clearInterval(countdownInterval);
         const constraints = {
-          video: {
-            width: { ideal: 1920 }, // Set the desired width
-            height: { ideal: 1080 }, // Set the desired height
-            frameRate: { ideal: 30 }, // Set the desired frame rate
-          },
+          video: true,
           audio: true,
         };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);

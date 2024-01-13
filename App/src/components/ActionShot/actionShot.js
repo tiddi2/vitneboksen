@@ -38,8 +38,8 @@ const ActionShot = () => {
     try {
       const constraints = {
         video: {
-          width: { ideal: 1080 }, // Set the desired width
-          height: { ideal: 1920 }, // Set the desired height
+          width: { ideal: 600 }, // Set the desired width
+          height: { ideal: 420 }, // Set the desired height
           frameRate: { ideal: 30 }, // Set the desired frame rate
         },
         audio: true,
