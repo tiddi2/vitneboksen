@@ -39,7 +39,13 @@ const ActionShot = () => {
       let countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
       }, 1000);
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      let stream;
+      await navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then((s) => {
+          stream = s;
+        })
+        .catch((e) => alert(e));
       setVideoStream(stream);
 
       const recorder = new MediaRecorder(stream, {
@@ -177,6 +183,7 @@ const ActionShot = () => {
             objectFit: "cover",
           }}
           playsinline
+          muted
           autoPlay
         />
       </div>
