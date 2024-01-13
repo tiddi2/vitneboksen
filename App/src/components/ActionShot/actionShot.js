@@ -49,7 +49,9 @@ const ActionShot = () => {
       setVideoStream(stream);
 
       const recorder = new MediaRecorder(stream, {
-        mimeType: "video/mp4",
+        mimeType: /iPhone/i.test(navigator.userAgent)
+          ? "video/mp4"
+          : "video/webm",
       });
 
       const recordedChunks = [];
@@ -62,14 +64,18 @@ const ActionShot = () => {
 
       recorder.onstop = async () => {
         const videoBlob = new Blob(recordedChunks, {
-          type: "video/mp4",
+          type: /iPhone/i.test(navigator.userAgent)
+            ? "video/mp4"
+            : "video/webm",
         });
 
         // Generate file name based on current date and time
         const now = new Date();
         const fileName = `vitneboksen_${now
           .toISOString()
-          .replace(/[:.]/g, "-")}.mp4`;
+          .replace(/[:.]/g, "-")}.${
+          /iPhone/i.test(navigator.userAgent) ? "mp4" : "webm"
+        }`;
 
         // upload video
         await uploadActionShot(sharedKey, videoBlob, fileName);
