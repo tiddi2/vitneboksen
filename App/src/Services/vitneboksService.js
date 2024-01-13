@@ -35,7 +35,7 @@ export async function createSession(existingSessionKey) {
     }
     const sharingKey = await response.text();
     // Parse and return the response data
-    return { sharedKey: sharingKey, sessionKey: sessionKey };
+    return { newSharedKey: sharingKey, newSessionKey: sessionKey };
   } catch (error) {
     // Handle errors here
     console.error("Error:", error);
