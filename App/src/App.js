@@ -17,7 +17,6 @@ const App = () => {
   return (
     <div>
       {sessionId ? <Contribute /> : <Home />}
-
       <p
         style={{
           position: "fixed",

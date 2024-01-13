@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import queryString from "query-string";
+import { createSession } from "../../Services/vitneboksService";
 import "./home.css";
 
 const defaultQuestions = [
@@ -57,6 +58,13 @@ const Home = () => {
     );
     setSessionKey(localStorage.getItem("sessionKey") || null);
   }, []);
+
+  const CreateSession = () => {
+    var guid = createSession();
+    if (guid) {
+      setSessionKey(guid);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -438,89 +446,23 @@ const Home = () => {
               textAlign: "left",
             }}
           />
-          <label>
-            Start ny session:
-            <input
-              type="text"
-              value={sessionKey}
-              onChange={(e) => {
-                setSessionKey(e.target.value);
-                localStorage.setItem("sessionKey", e.target.value);
-              }}
-            />
-          </label>
-          <label>
-            Link til deling:
-            <input
-              type="text"
-              value={`${window.location}?session=${sessionKey}`}
-              disabled={true}
-            />
-          </label>
+          {sessionKey ? (
+            <label>
+              Start ny session:
+              <button onClick={createSession}>Opprett</button>
+            </label>
+          ) : (
+            <label>
+              Link til deling:
+              <input
+                type="text"
+                value={`${window.location}?session=${sessionKey}`}
+                disabled={true}
+              />
+            </label>
+          )}
         </div>
       )}
-      <p
-        style={{
-          position: "fixed",
-          display: "flex",
-          bottom: "0",
-          left: "5%",
-          alignItems: "baseline",
-          alignContent: "baseline",
-          gap: "10px",
-        }}
-      >
-        Sponset av
-        <a href="https://spritjakt.no">
-          <img src="spritjakt.png" alt="spritjakt logo" height={"25px"} />
-        </a>
-        og
-        <a href="https://erdetfesthosmatsikveld.no">
-          erdetfesthosmatsikveld.no
-        </a>
-      </p>
-      <p
-        style={{
-          position: "fixed",
-          right: "0%",
-          left: "0%",
-          bottom: "0",
-          marginLeft: "auto",
-          marginRight: "auto",
-          alignItems: "baseline",
-          alignContent: "baseline",
-          gap: "10px",
-        }}
-      >
-        © 2024{" "}
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://no.linkedin.com/in/mats-l%C3%B8vstrand-berntsen-4682b2142"
-        >
-          Mats Løvstrand Berntsen
-        </a>
-      </p>
-      <p
-        style={{
-          position: "fixed",
-          display: "flex",
-          bottom: "0",
-          right: "5%",
-          alignItems: "baseline",
-          alignContent: "baseline",
-          gap: "10px",
-        }}
-      >
-        Kildekoden finner du på
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://github.com/matslb/vitneboksen"
-        >
-          Github
-        </a>
-      </p>
     </div>
   );
 };
