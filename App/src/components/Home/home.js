@@ -93,7 +93,11 @@ const Home = () => {
       setTimeout(async () => {
         clearInterval(countdownInterval);
         const constraints = {
-          video: true,
+          video: {
+            width: { ideal: 1920 }, // Set the desired width
+            height: { ideal: 1080 }, // Set the desired height
+            frameRate: { ideal: 30 }, // Set the desired frame rate
+          },
           audio: true,
         };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);

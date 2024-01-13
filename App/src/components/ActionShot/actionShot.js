@@ -33,15 +33,11 @@ const ActionShot = () => {
   }, [videoStream]);
 
   const startRecording = async () => {
-    setCountdown(countdownTime / 1000);
+    setCountdown(recordTime / 1000);
 
     try {
       const constraints = {
-        video: {
-          width: { ideal: 600 }, // Set the desired width
-          height: { ideal: 420 }, // Set the desired height
-          frameRate: { ideal: 30 }, // Set the desired frame rate
-        },
+        video: true,
         audio: true,
       };
       let countdownInterval = setInterval(() => {
