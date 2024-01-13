@@ -176,6 +176,7 @@ const ActionShot = () => {
             borderRadius: "6px",
             objectFit: "cover",
           }}
+          playsinline
           autoPlay
         />
       </div>
