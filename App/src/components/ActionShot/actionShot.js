@@ -113,6 +113,7 @@ const ActionShot = () => {
       }, recordTime); // Record
     } catch (error) {
       console.error("Error accessing webcam:", error);
+      alert(error);
     }
   };
 
