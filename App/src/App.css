@@ -17,10 +17,9 @@ html {
 div {
   border-radius: 6px;
 }
-input {
+input,
+button {
   color: black;
-  width: 3rem;
-  text-align: left;
 }
 
 .settings label {

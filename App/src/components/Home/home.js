@@ -54,15 +54,16 @@ const Home = () => {
     setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 15000);
     setWaitTime(JSON.parse(localStorage.getItem("waitTime")) || 30000);
     setQuestionsRawString(
-      JSON.parse(localStorage.getItem("questionsRawString"))
+      JSON.parse(localStorage.getItem("questionsRawString")) || ""
     );
     setSessionKey(localStorage.getItem("sessionKey") || null);
   }, []);
 
-  const CreateSession = () => {
-    var guid = createSession();
+  const CreateSession = async () => {
+    var guid = await createSession();
     if (guid) {
       setSessionKey(guid);
+      localStorage.setItem("sessionKey", guid);
     }
   };
 
@@ -446,10 +447,10 @@ const Home = () => {
               textAlign: "left",
             }}
           />
-          {sessionKey ? (
+          {sessionKey == null ? (
             <label>
               Start ny session:
-              <button onClick={createSession}>Opprett</button>
+              <button onClick={CreateSession}>Opprett</button>
             </label>
           ) : (
             <label>

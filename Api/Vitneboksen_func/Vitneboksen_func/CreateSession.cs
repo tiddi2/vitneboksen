@@ -1,29 +1,30 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
-
 namespace Vitneboksen_func
 {
-    public static class CreateSession
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.WebJobs.Extensions.Http;
+    using Microsoft.Extensions.Logging;
+    using System;
+    using System.Threading.Tasks;
+
+    namespace Vitneboksen_func
     {
-        [FunctionName("create-session")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-            ILogger log)
+        public static class CreateSession
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            [FunctionName("create-session")]
+            public static async Task<IActionResult> Run(
+                [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
+                ILogger log)
+            {
+                log.LogInformation("C# HTTP trigger function processed a request.");
 
-            string sessionKey = req.Query["sessionKey"];
+                var sessionKey = Guid.NewGuid();
 
-            string responseMessage = string.IsNullOrEmpty(sessionKey)
-                ? "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response."
-                : $"Hello, {sessionKey}. This HTTP triggered function executed successfully.";
+                return new OkObjectResult(sessionKey);
+            }
 
-            return new OkObjectResult(responseMessage);
         }
-
     }
+
 }
