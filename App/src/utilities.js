@@ -1,9 +1,9 @@
 export const GetRecordingConstrains = async () => {
   let constraints = {
     video: {
-      width: { ideal: 1920 }, // Set the desired width
-      height: { ideal: 1080 }, // Set the desired height
-      frameRate: { ideal: 30 }, // Set the desired frame rate
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+      frameRate: { ideal: 30 },
     },
     audio: {
       noiseSuppression: false,

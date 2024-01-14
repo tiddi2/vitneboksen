@@ -59,9 +59,9 @@ const ActionShot = () => {
       };
 
       recorder.onstop = async () => {
-        const { videoBlob, fileName } = prepFile(recordedChunks);
+        const { blob, fileName } = prepFile(recordedChunks);
 
-        await uploadActionShot(sharedKey, videoBlob, fileName);
+        await uploadActionShot(sharedKey, blob, fileName);
 
         if (videoStream) {
           videoStream.getTracks().forEach((track) => track.stop());
