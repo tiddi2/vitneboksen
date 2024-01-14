@@ -44,6 +44,23 @@ const Home = () => {
   const [lastUpload, setLastUpload] = useState(null);
   const [videoCount, setVideoCount] = useState(null);
 
+  const GetSession = async (sessionKey = inputKey) => {
+    var {
+      sharingKey: newSharedKey,
+      sessionKey: newSessionKey,
+      videoCount,
+      lastUpload,
+    } = await getSession(sessionKey);
+    if (newSessionKey) {
+      setSharedKey(newSharedKey);
+      setSessionKey(newSessionKey);
+      setLastUpload(lastUpload);
+      setVideoCount(videoCount);
+      localStorage.setItem("sessionKey", newSessionKey);
+      localStorage.setItem("sharedKey", newSharedKey);
+    }
+  };
+
   useEffect(() => {
     document.addEventListener("keypress", handleKeyPress);
     const customQuestions = JSON.parse(localStorage.getItem("questions"));
@@ -65,23 +82,6 @@ const Home = () => {
       GetSession(session);
     }
   }, [GetSession]);
-
-  const GetSession = async (sessionKey = inputKey) => {
-    var {
-      sharingKey: newSharedKey,
-      sessionKey: newSessionKey,
-      videoCount,
-      lastUpload,
-    } = await getSession(sessionKey);
-    if (newSessionKey) {
-      setSharedKey(newSharedKey);
-      setSessionKey(newSessionKey);
-      setLastUpload(lastUpload);
-      setVideoCount(videoCount);
-      localStorage.setItem("sessionKey", newSessionKey);
-      localStorage.setItem("sharedKey", newSharedKey);
-    }
-  };
 
   useEffect(() => {
     return () => {
