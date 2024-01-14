@@ -64,7 +64,7 @@ const Home = () => {
     if (session) {
       GetSession(session);
     }
-  }, []);
+  }, [GetSession]);
 
   const GetSession = async (sessionKey = inputKey) => {
     var {
