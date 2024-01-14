@@ -5,16 +5,20 @@ import "./App.css";
 import ActionShot from "./components/ActionShot/actionShot";
 
 const App = () => {
-  const [sessionId, setSessionId] = useState(null);
+  const [sharedKey, setSharedKey] = useState(null);
 
   useEffect(() => {
     let parsed = queryString.parse(window.location.search);
     if (parsed?.session) {
-      setSessionId(parsed.session);
+      setSharedKey(parsed.session);
+    } else {
+      setSharedKey(false);
     }
   }, []);
 
-  return <div>{sessionId ? <ActionShot /> : <Home />}</div>;
+  return (
+    <div>{sharedKey !== null ? sharedKey ? <ActionShot /> : <Home /> : ""}</div>
+  );
 };
 
 export default App;
