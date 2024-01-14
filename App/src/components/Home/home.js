@@ -138,12 +138,16 @@ const Home = () => {
             recordedChunks,
             "mp4"
           );
-          const srtContent = `1\n00:00:00,000 --> 00:00:10,000\n${currentQuestion}`;
+          const srtContent = [
+            `1\n00:00:00,000 --> 00:00:10,000\n${currentQuestion}`,
+          ];
           const { blob: srtBlob, fileName: srtFileName } = prepFile(
-            [srtContent],
+            srtContent,
             "srt"
           );
 
+          downoadFile(videoBlob, videoFileName);
+          downoadFile(srtBlob, srtFileName);
           // Save video
           if (!sessionKey) {
             downoadFile(videoBlob, videoFileName);
@@ -492,7 +496,7 @@ const Home = () => {
                   <a
                     style={{ width: "4rem" }}
                     className="button"
-                    href={`${process.env.REACT_APP_API}/download-session-files?sessionKey=${sessionKey}`}
+                    href={`${process.env.REACT_APP_API}download-session-files?sessionKey=${sessionKey}`}
                   >
                     Last ned
                   </a>

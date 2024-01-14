@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Vitneboksen_func
 {
-    public static class CreateSession
+    public static class GetSession
     {
         [FunctionName("get-session")]
         public static async Task<IActionResult> Run(
