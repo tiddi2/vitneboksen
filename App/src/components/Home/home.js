@@ -79,9 +79,21 @@ const Home = () => {
     );
     const session = localStorage.getItem("sessionKey") || null;
     if (session) {
-      GetSession(session);
+      getSession(session).then(
+        ({
+          sharingKey: newSharedKey,
+          sessionKey: newSessionKey,
+          videoCount,
+          lastUpload,
+        }) => {
+          setSharedKey(newSharedKey);
+          setSessionKey(newSessionKey);
+          setLastUpload(lastUpload);
+          setVideoCount(videoCount);
+        }
+      );
     }
-  }, [GetSession]);
+  }, []);
 
   useEffect(() => {
     return () => {
