@@ -42,6 +42,7 @@ const Home = () => {
   const [waitTime, setWaitTime] = useState(30000);
 
   useEffect(() => {
+    console.log(process.env.REACT_APP_API_KEY);
     document.addEventListener("keypress", handleKeyPress);
     const customQuestions = JSON.parse(localStorage.getItem("questions"));
     setQuestions(
@@ -463,7 +464,7 @@ const Home = () => {
               <label>
                 Videoer:
                 <a
-                  href={`https://vitneboksenfunc20240113125528.azurewebsites.net/api/download-session-files?sessionKey=${sessionKey}`}
+                  href={`${process.env.REACT_APP_API}/download-session-files?sessionKey=${sessionKey}`}
                 >
                   Last ned
                 </a>
