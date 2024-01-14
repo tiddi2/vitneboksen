@@ -4,6 +4,7 @@ import {
   uploadTestemony,
 } from "../../Services/vitneboksService";
 import "./home.css";
+import { GetRecordingConstrains, downoadFile, prepFile } from "../../utilities";
 
 const defaultQuestions = [
   "Hvordan føler du deg i dag etter dagens hendelser?",
@@ -51,7 +52,7 @@ const Home = () => {
         : customQuestions
     );
     setCountdownTime(JSON.parse(localStorage.getItem("countdownTime")) || 3000);
-    setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 15000);
+    setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 5000);
     setWaitTime(JSON.parse(localStorage.getItem("waitTime")) || 30000);
     setQuestionsRawString(
       JSON.parse(localStorage.getItem("questionsRawString")) || ""
@@ -92,20 +93,13 @@ const Home = () => {
       setQuestion(currentQuestion);
       setTimeout(async () => {
         clearInterval(countdownInterval);
-        const constraints = {
-          video: {
-            width: { ideal: 1920 }, // Set the desired width
-            height: { ideal: 1080 }, // Set the desired height
-            frameRate: { ideal: 30 }, // Set the desired frame rate
-          },
-          audio: true,
-        };
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+
+        const stream = await navigator.mediaDevices.getUserMedia(
+          await GetRecordingConstrains()
+        );
         setVideoStream(stream);
 
-        const recorder = new MediaRecorder(stream, {
-          mimeType: "video/webm",
-        });
+        const recorder = new MediaRecorder(stream);
 
         const recordedChunks = [];
 
@@ -116,34 +110,26 @@ const Home = () => {
         };
 
         recorder.onstop = async () => {
-          const videoBlob = new Blob(recordedChunks, {
-            type: "video/webm",
-          });
-
-          // Generate file name based on current date and time
-          const now = new Date();
-          const fileName = `vitneboksen_${now
-            .toISOString()
-            .replace(/[:.]/g, "-")}.webm`;
-
-          // Generate and save SRT file
+          const { blob: videoBlob, fileName: videoFileName } = prepFile(
+            recordedChunks,
+            "mp4"
+          );
           const srtContent = `1\n00:00:00,000 --> 00:00:10,000\n${currentQuestion}`;
-
-          const srtBlob = new Blob([srtContent], { type: "text/srt" });
-          const srtFileName = `vitneboksen_${now
-            .toISOString()
-            .replace(/[:.]/g, "-")}.srt`;
+          const { blob: srtBlob, fileName: srtFileName } = prepFile(
+            [srtContent],
+            "srt"
+          );
 
           // Save video
           if (!sessionKey) {
-            saveBlobAsFile(videoBlob, fileName);
-            saveBlobAsFile(srtBlob, srtFileName);
+            downoadFile(videoBlob, videoFileName);
+            downoadFile(srtBlob, srtFileName);
           } else {
-            // upload vide
+            // upload video
             await uploadTestemony(
               sessionKey,
               videoBlob,
-              fileName,
+              videoFileName,
               srtBlob,
               srtFileName
             );
@@ -198,18 +184,6 @@ const Home = () => {
     } catch (error) {
       console.error("Error accessing webcam:", error);
     }
-  };
-
-  // Function to save Blob as a file
-  const saveBlobAsFile = (blob, fileName) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   const handleKeyPress = (event) => {

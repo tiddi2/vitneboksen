@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import queryString from "query-string";
 import { uploadActionShot } from "../../Services/vitneboksService";
 import "./actionShot.css";
+import { GetRecordingConstrains, prepFile } from "../../utilities";
 
 const ActionShot = () => {
   const [videoStream, setVideoStream] = useState(null);
@@ -32,27 +33,22 @@ const ActionShot = () => {
     setCountdown(recordTime / 1000);
 
     try {
-      const constraints = {
-        video: true,
-        audio: true,
-      };
       let countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
       }, 1000);
+
       let stream;
+
       await navigator.mediaDevices
-        .getUserMedia(constraints)
+        .getUserMedia(await GetRecordingConstrains())
         .then((s) => {
           stream = s;
         })
         .catch((e) => alert(e));
+
       setVideoStream(stream);
 
-      const recorder = new MediaRecorder(stream, {
-        mimeType: /iPhone/i.test(navigator.userAgent)
-          ? "video/mp4"
-          : "video/webm",
-      });
+      const recorder = new MediaRecorder(stream);
 
       const recordedChunks = [];
 
@@ -63,22 +59,10 @@ const ActionShot = () => {
       };
 
       recorder.onstop = async () => {
-        const videoBlob = new Blob(recordedChunks, {
-          type: /iPhone/i.test(navigator.userAgent)
-            ? "video/mp4"
-            : "video/webm",
-        });
+        const { videoBlob, fileName } = prepFile(recordedChunks);
 
-        // Generate file name based on current date and time
-        const now = new Date();
-        const fileName = `vitneboksen_${now
-          .toISOString()
-          .replace(/[:.]/g, "-")}.${
-          /iPhone/i.test(navigator.userAgent) ? "mp4" : "webm"
-        }`;
-
-        // upload video
         await uploadActionShot(sharedKey, videoBlob, fileName);
+
         if (videoStream) {
           videoStream.getTracks().forEach((track) => track.stop());
         }
@@ -136,8 +120,8 @@ const ActionShot = () => {
           position: "relative",
           overflow: "hidden",
           margin: "auto",
-          width: "80%",
-          height: "90%", // Adjusted height to make space for buttons
+          width: "100%",
+          height: "100%",
         }}
       >
         {recording && (
@@ -184,9 +168,8 @@ const ActionShot = () => {
         <video
           id="video"
           style={{
-            width: "99%",
-            height: "94%",
-            borderRadius: "6px",
+            width: "100%",
+            height: "100%",
             objectFit: "cover",
           }}
           playsinline
