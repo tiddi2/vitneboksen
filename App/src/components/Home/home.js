@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
-  createSession,
+  deleteSession,
+  getSession,
   uploadTestemony,
 } from "../../Services/vitneboksService";
 import "./home.css";
@@ -40,9 +41,10 @@ const Home = () => {
   const [countdownTime, setCountdownTime] = useState(3000);
   const [recordTime, setRecordTime] = useState(15000);
   const [waitTime, setWaitTime] = useState(30000);
+  const [lastUpload, setLastUpload] = useState(null);
+  const [videoCount, setVideoCount] = useState(null);
 
   useEffect(() => {
-    console.log(process.env.REACT_APP_API_KEY);
     document.addEventListener("keypress", handleKeyPress);
     const customQuestions = JSON.parse(localStorage.getItem("questions"));
     setQuestions(
@@ -58,15 +60,24 @@ const Home = () => {
     setQuestionsRawString(
       JSON.parse(localStorage.getItem("questionsRawString")) || ""
     );
-    setSessionKey(localStorage.getItem("sessionKey") || null);
-    setSharedKey(localStorage.getItem("sharedKey") || null);
+    const session = localStorage.getItem("sessionKey") || null;
+    if (session) {
+      GetSession(session);
+    }
   }, []);
 
-  const CreateSession = async () => {
-    var { newSharedKey, newSessionKey } = await createSession(inputKey);
+  const GetSession = async (sessionKey = inputKey) => {
+    var {
+      sharingKey: newSharedKey,
+      sessionKey: newSessionKey,
+      videoCount,
+      lastUpload,
+    } = await getSession(sessionKey);
     if (newSessionKey) {
       setSharedKey(newSharedKey);
       setSessionKey(newSessionKey);
+      setLastUpload(lastUpload);
+      setVideoCount(videoCount);
       localStorage.setItem("sessionKey", newSessionKey);
       localStorage.setItem("sharedKey", newSharedKey);
     }
@@ -193,6 +204,20 @@ const Home = () => {
     }
   };
 
+  const deleteSessionClick = async () => {
+    if (
+      window.confirm(
+        "Er du sikker på at du vil slette Vitneboksen? Det kan ikke angres"
+      )
+    ) {
+      await deleteSession(sessionKey);
+      setSessionKey(null);
+      setSharedKey(null);
+      setLastUpload(null);
+      setVideoCount(null);
+    }
+  };
+
   const handleTextareaChange = (event) => {
     const inputString = event.target.value;
     const newArray = parseNewlineSeparatedList(inputString);
@@ -292,6 +317,7 @@ const Home = () => {
       <div
         style={{
           position: "fixed",
+          textAlign: "center",
           bottom: "50%",
           left: "50%",
           transform: "translateX(-50%)",
@@ -376,17 +402,15 @@ const Home = () => {
             width: "20rem",
             background: "rgba(25, 25, 25, 1)",
             boxShadow: "1px 1px 4px black",
-            padding: "20px",
+            padding: "0.5rem 1rem",
+            justifyItems: "flex-end",
             borderRadius: "10px",
-            display: "flex",
-            gap: ".5rem",
-            alignItems: "baseLine",
-            flexDirection: "column",
             zIndex: 5,
           }}
         >
+          <h3>Konfigurasjon</h3>
           <label>
-            Ventetid før opptak:
+            <span>Ventetid før opptak:</span>
             <input
               type="number"
               value={countdownTime / 1000}
@@ -397,9 +421,8 @@ const Home = () => {
               }}
             />
           </label>
-          <br />
           <label>
-            Opptakstid:
+            <span>Opptakstid:</span>
             <input
               type="number"
               value={recordTime / 1000}
@@ -410,9 +433,8 @@ const Home = () => {
               }}
             />
           </label>
-          <br />
           <label>
-            Ventetid etter opptak:
+            <span>Ventetid etter opptak:</span>
             <input
               type="number"
               value={waitTime / 1000}
@@ -423,8 +445,7 @@ const Home = () => {
               }}
             />
           </label>
-          <br />
-          Spørsmål (ett per linje)
+          <span>Spørsmål (ett per linje)</span>
           <textarea
             onChange={handleTextareaChange}
             value={questionsRawString}
@@ -437,20 +458,36 @@ const Home = () => {
           />
           {sessionKey == null ? (
             <label>
-              Start ny session:
+              <span>Opprett ny vitneboks:</span>
               <div>
                 <input
                   type="text"
+                  style={{ width: "5rem" }}
                   value={inputKey}
                   onChange={(e) => setInputKey(e.target.value)}
                 />
-                <button onClick={CreateSession}>Opprett</button>
+                <button onClick={() => GetSession()}>Opprett</button>
               </div>
             </label>
           ) : (
             <div>
+              <h3>Tilkobling</h3>
               <label>
-                Aktiv session:
+                <span>Antall vitnesbyrd:</span>
+                <div>
+                  {videoCount || 0}
+                  &nbsp; &nbsp;
+                  <a
+                    style={{ width: "4rem" }}
+                    className="button"
+                    href={`${process.env.REACT_APP_API}/download-session-files?sessionKey=${sessionKey}`}
+                  >
+                    Last ned
+                  </a>
+                </div>
+              </label>
+              <label>
+                Vitneboks-ID:
                 <input type="text" value={sessionKey} disabled={true} />
               </label>
               <label>
@@ -461,14 +498,18 @@ const Home = () => {
                   disabled={true}
                 />
               </label>
-              <label>
-                Videoer:
-                <a
-                  href={`${process.env.REACT_APP_API}/download-session-files?sessionKey=${sessionKey}`}
-                >
-                  Last ned
-                </a>
-              </label>
+              {lastUpload && (
+                <label>
+                  Siste opplasting:
+                  <span>{new Date(lastUpload).toLocaleString()}</span>
+                </label>
+              )}
+
+              <div>
+                <button className="red" onClick={deleteSessionClick}>
+                  Slett vitneboks
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -492,7 +533,7 @@ const Home = () => {
           }}
         >
           Sponset av
-          <a href="https://spritjakt.no">
+          <a style={{ margin: "0 5px" }} href="https://spritjakt.no">
             <img
               src="spritjakt.png"
               alt="spritjakt logo"
@@ -501,7 +542,10 @@ const Home = () => {
             />
           </a>
           og
-          <a href="https://erdetfesthosmatsikveld.no">
+          <a
+            style={{ margin: "0 5px" }}
+            href="https://erdetfesthosmatsikveld.no"
+          >
             erdetfesthosmatsikveld.no
           </a>
         </p>

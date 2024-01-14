@@ -59,7 +59,7 @@ const ActionShot = () => {
       };
 
       recorder.onstop = async () => {
-        const { blob, fileName } = prepFile(recordedChunks);
+        const { blob, fileName } = prepFile(recordedChunks, "mp4");
 
         await uploadActionShot(sharedKey, blob, fileName);
 

@@ -5,16 +5,15 @@ function generateKey() {
     return v.toString(16);
   });
 }
-const apiUrl = process.env.REACT_APP_API;
 
 // Function to make the GET request
-export async function createSession(existingSessionKey) {
+export async function getSession(existingSessionKey) {
   // URL for the API endpoint
   const sessionKey = existingSessionKey || generateKey();
 
   // Generate a new GUID
   // Append the sessionKey to the URL as a query parameter
-  const urlWithQueryParam = `${apiUrl}create-session?sessionKey=${sessionKey}`;
+  const urlWithQueryParam = `${process.env.REACT_APP_API}get-session?sessionKey=${sessionKey}`;
 
   try {
     // Make the GET request using fetch
@@ -32,9 +31,8 @@ export async function createSession(existingSessionKey) {
       console.log(response.error);
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    const sharingKey = await response.text();
     // Parse and return the response data
-    return { newSharedKey: sharingKey, newSessionKey: sessionKey };
+    return await response.json();
   } catch (error) {
     // Handle errors here
     console.error("Error:", error);
@@ -49,7 +47,7 @@ export async function uploadTestemony(
   subfile,
   subName
 ) {
-  const urlWithQueryParam = `${apiUrl}upload-testemony?sessionKey=${sessionKey}`;
+  const urlWithQueryParam = `${process.env.REACT_APP_API}upload-testemony?sessionKey=${sessionKey}`;
 
   const formData = new FormData();
   formData.append("video", videofile, videoName);
@@ -58,11 +56,28 @@ export async function uploadTestemony(
 }
 
 export async function uploadActionShot(sharedKey, videofile, videoName) {
-  const urlWithQueryParam = `${apiUrl}upload-actionshot?sharedKey=${sharedKey}`;
+  const urlWithQueryParam = `${process.env.REACT_APP_API}upload-actionshot?sharedKey=${sharedKey}`;
 
   const formData = new FormData();
   formData.append("video", videofile, videoName);
   await uploadFile(urlWithQueryParam, formData);
+}
+
+export async function deleteSession(sessionKey) {
+  const urlWithQueryParam = `${process.env.REACT_APP_API}delete-session?sessionKey=${sessionKey}`;
+
+  try {
+    await fetch(urlWithQueryParam, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": window.location,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  return true;
 }
 
 async function uploadFile(url, formData) {
