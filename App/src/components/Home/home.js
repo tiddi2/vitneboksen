@@ -146,8 +146,6 @@ const Home = () => {
             "srt"
           );
 
-          downoadFile(videoBlob, videoFileName);
-          downoadFile(srtBlob, srtFileName);
           // Save video
           if (!sessionKey) {
             downoadFile(videoBlob, videoFileName);
