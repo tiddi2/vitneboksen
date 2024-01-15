@@ -31,4 +31,5 @@ public static class Helpers
 
         return blobService.GetBlobContainerClient(container.Name);
     }
+
 }

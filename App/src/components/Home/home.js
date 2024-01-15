@@ -229,6 +229,7 @@ const Home = () => {
       setSharedKey(null);
       setLastUpload(null);
       setVideoCount(null);
+      localStorage.clear();
     }
   };
 
@@ -497,6 +498,15 @@ const Home = () => {
                     href={`${process.env.REACT_APP_API}download-session-files?sessionKey=${sessionKey}`}
                   >
                     Last ned
+                  </a>
+                </div>
+                <div>
+                  <a
+                    style={{ width: "4rem" }}
+                    className="button"
+                    href={`${process.env.REACT_APP_API}download-concatenated-video?sessionKey=${sessionKey}`}
+                  >
+                    Last ned hele
                   </a>
                 </div>
               </label>
