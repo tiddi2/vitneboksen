@@ -6,8 +6,10 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Threading.Tasks;
 
 namespace Vitneboksen_func
@@ -34,7 +36,7 @@ namespace Vitneboksen_func
 
             // Download .mp4 files
             var blobs = containerClient.GetBlobsAsync();
-            var tempFolder = Path.Combine(Environment.CurrentDirectory, "temp");
+            var tempFolder = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempFolder);
             var fileListPath = Path.Combine(tempFolder, "fileList.txt");
             using (var fileListWriter = new StreamWriter(fileListPath))
@@ -52,7 +54,7 @@ namespace Vitneboksen_func
             }
 
             // Additional code to parse JSON files and generate SRT file
-            var totalDuration = 1;
+            var totalDuration = 0;
             var srtFilePath = Path.Combine(tempFolder, "subtitles.srt");
             var srtFileIndex = 1;
 
@@ -82,15 +84,40 @@ namespace Vitneboksen_func
 
             // Concatenate using FFmpeg
             var concatFilePath = Path.Combine(tempFolder, "concated.mp4");
-            await ExcuteFFmpegCommand($"-f concat -safe 0 -i {fileListPath} -c:v mpeg4 -c:a copy {concatFilePath}", log);
+            await ExcuteFFmpegCommand($"-f concat -safe 0 -i {fileListPath} -s 1920x1080 -c:v copy -c:a aac {concatFilePath}", log);
 
-            var outputFilePath = Path.Combine(tempFolder, "output.mp4");
-            await ExcuteFFmpegCommand($"-i {concatFilePath} -vf \"subtitles='temp/subtitles.srt'\" {outputFilePath}", log);
 
-            var fileBytes = File.ReadAllBytes(outputFilePath);
-            Directory.Delete(tempFolder, true);
+            // var outputFilePath = Path.Combine(tempFolder, "output.mp4");
+            //await ExcuteFFmpegCommand($"-i {concatFilePath} -vf \"subtitles='{srtFilePath}'\" {concatFilePath}", log);
 
-            return new FileContentResult(fileBytes, "video / mp4");
+            using var memoryStream = new MemoryStream();
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+            {
+                foreach (var file in new Dictionary<string, string>() { { "video.mp4", concatFilePath }, { "video.srt", srtFilePath } })
+                {
+                    var fileStream = File.OpenRead(file.Value);
+
+                    // Create an entry in the zip file for each blob
+                    var entry = archive.CreateEntry(file.Key, CompressionLevel.Fastest);
+
+                    // Copy the blob content to the zip entry
+                    using (var entryStream = entry.Open())
+                    {
+                        await fileStream.CopyToAsync(entryStream);
+                    }
+                }
+            }
+
+
+            // Set the position of the memory stream to the beginning
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            var bytes = memoryStream.ToArray();
+
+            // Return the zip file as the response
+            return new FileContentResult(bytes, "application/zip")
+            {
+                FileDownloadName = "vitneboksen.zip"
+            };
         }
 
         private static async Task ExcuteFFmpegCommand(string arguments, ILogger log)
@@ -105,31 +132,24 @@ namespace Vitneboksen_func
                 CreateNoWindow = true
             };
 
-            using var process = Process.Start(ffmpegStartInfo);
-            try
+            using (var process = new Process
             {
-
+                StartInfo = ffmpegStartInfo
+            })
+            {
+                process.Start();
                 await process.WaitForExitAsync();
-                var output = process.StandardOutput.ReadToEnd();
-                var error = process.StandardError.ReadToEnd();
-                log.LogInformation(output);
+
+                var output = await process.StandardOutput.ReadToEndAsync();
+                var error = await process.StandardError.ReadToEndAsync();
+                log.LogError(error);
                 if (process.ExitCode != 0)
                 {
-                    log.LogError(error);
-                    throw new InvalidOperationException("FFmpeg failed to concatenate the videos.");
+                    throw new InvalidOperationException("FFmpeg failed with exit code: " + error);
                 }
                 process.Dispose();
             }
-            catch (Exception e)
-            {
-                log.LogError(e.Message);
-            }
-            finally
-            {
-                process.Dispose();
-            }
         }
-
         private class SubtitleItem
         {
             public int Duration { get; set; }
