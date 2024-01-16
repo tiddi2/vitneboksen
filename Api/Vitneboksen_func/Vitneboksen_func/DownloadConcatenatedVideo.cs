@@ -36,7 +36,7 @@ namespace Vitneboksen_func
 
             // Download .mp4 files
             var blobs = containerClient.GetBlobsAsync();
-            var tempFolder = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid().ToString());
+            var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             Directory.CreateDirectory(tempFolder);
             var fileListPath = Path.Combine(tempFolder, "fileList.txt");
             using (var fileListWriter = new StreamWriter(fileListPath))
@@ -84,7 +84,7 @@ namespace Vitneboksen_func
 
             // Concatenate using FFmpeg
             var concatFilePath = Path.Combine(tempFolder, "concated.mp4");
-            await ExcuteFFmpegCommand($"-f concat -safe 0 -i {fileListPath} -s 1920x1080 -c:v copy -c:a aac {concatFilePath}", log);
+            await ExcuteFFmpegCommand($"-f concat -safe 0 -i {fileListPath} -s 1920x1080 -qscale:v 1 -c:v copy -c:a aac {concatFilePath}", log);
 
 
             // var outputFilePath = Path.Combine(tempFolder, "output.mp4");
