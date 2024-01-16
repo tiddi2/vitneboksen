@@ -138,12 +138,14 @@ const Home = () => {
             recordedChunks,
             "mp4"
           );
-          const srtContent = [
-            `1\n00:00:00,000 --> 00:00:10,000\n${currentQuestion}`,
-          ];
+
+          const textFileContent = {
+            duration: recordTime / 1000,
+            text: currentQuestion,
+          };
           const { blob: srtBlob, fileName: srtFileName } = prepFile(
-            srtContent,
-            "srt"
+            [JSON.stringify(textFileContent)],
+            "json"
           );
 
           // Save video

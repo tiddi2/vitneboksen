@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Vitneboksen_func
@@ -16,8 +16,8 @@ namespace Vitneboksen_func
     {
         [FunctionName("download-concatenated-video")]
         public static async Task<IActionResult> Run(
-          [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
-          ILogger log)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
+            ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -32,43 +32,84 @@ namespace Vitneboksen_func
                 return new NotFoundObjectResult("Not found");
             }
 
-            // Download .mp4 and .srt files
+            // Download .mp4 files
             var blobs = containerClient.GetBlobsAsync();
-            var tempFolder = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var tempFolder = Path.Combine(Environment.CurrentDirectory, "temp");
             Directory.CreateDirectory(tempFolder);
             var fileListPath = Path.Combine(tempFolder, "fileList.txt");
             using (var fileListWriter = new StreamWriter(fileListPath))
             {
                 await foreach (var blobItem in blobs)
                 {
-                    if (blobItem.Name.EndsWith(".mp4") || blobItem.Name.EndsWith(".srt"))
+                    if (blobItem.Name.EndsWith(".mp4"))
                     {
                         var blobClient = containerClient.GetBlobClient(blobItem.Name);
                         var downloadPath = Path.Combine(tempFolder, blobItem.Name);
                         await blobClient.DownloadToAsync(downloadPath);
-                        if (blobItem.Name.EndsWith(".mp4"))
-                        {
-                            fileListWriter.WriteLine($"file '{downloadPath}'");
-                        }
+                        fileListWriter.WriteLine($"file '{downloadPath}'");
                     }
                 }
             }
 
-            // Concatenate using FFmpeg and add subtitles
+            // Additional code to parse JSON files and generate SRT file
+            var totalDuration = 1;
+            var srtFilePath = Path.Combine(tempFolder, "subtitles.srt");
+            var srtFileIndex = 1;
+
+            using (var srtFileWriter = new StreamWriter(srtFilePath))
+            {
+                await foreach (var blobItem in blobs)
+                {
+                    if (blobItem.Name.EndsWith(".json"))
+                    {
+                        var jsonBlobClient = containerClient.GetBlobClient(blobItem.Name);
+                        var jsonDownloadPath = Path.Combine(tempFolder, blobItem.Name);
+                        await jsonBlobClient.DownloadToAsync(jsonDownloadPath);
+
+                        var jsonContent = await File.ReadAllTextAsync(jsonDownloadPath);
+                        var subtitle = JsonConvert.DeserializeObject<SubtitleItem>(jsonContent);
+
+                        var startTime = TimeSpan.FromSeconds(totalDuration);
+                        var endTime = TimeSpan.FromSeconds(totalDuration + subtitle.Duration);
+                        srtFileWriter.WriteLine(srtFileIndex++);
+                        srtFileWriter.WriteLine($"{FormatTimeSpan(startTime)} --> {FormatTimeSpan(endTime)}");
+                        srtFileWriter.WriteLine(subtitle.Text);
+                        srtFileWriter.WriteLine();
+                        totalDuration += subtitle.Duration;
+                    }
+                }
+            }
+
+            // Concatenate using FFmpeg
+            var concatFilePath = Path.Combine(tempFolder, "concated.mp4");
+            await ExcuteFFmpegCommand($"-f concat -safe 0 -i {fileListPath} -c:v mpeg4 -c:a copy {concatFilePath}", log);
+
             var outputFilePath = Path.Combine(tempFolder, "output.mp4");
-            var startInfo = new ProcessStartInfo
+            await ExcuteFFmpegCommand($"-i {concatFilePath} -vf \"subtitles='temp/subtitles.srt'\" {outputFilePath}", log);
+
+            var fileBytes = File.ReadAllBytes(outputFilePath);
+            Directory.Delete(tempFolder, true);
+
+            return new FileContentResult(fileBytes, "video / mp4");
+        }
+
+        private static async Task ExcuteFFmpegCommand(string arguments, ILogger log)
+        {
+            var ffmpegStartInfo = new ProcessStartInfo
             {
                 FileName = Path.Combine(Environment.CurrentDirectory, "ffmpeg.exe"),
-                Arguments = BuildFfmpegArguments(tempFolder, fileListPath, outputFilePath),
+                Arguments = arguments,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
 
-            using (var process = Process.Start(startInfo))
+            using var process = Process.Start(ffmpegStartInfo);
+            try
             {
-                process.WaitForExit();
+
+                await process.WaitForExitAsync();
                 var output = process.StandardOutput.ReadToEnd();
                 var error = process.StandardError.ReadToEnd();
                 log.LogInformation(output);
@@ -77,44 +118,27 @@ namespace Vitneboksen_func
                     log.LogError(error);
                     throw new InvalidOperationException("FFmpeg failed to concatenate the videos.");
                 }
+                process.Dispose();
             }
-
-            var fileBytes = File.ReadAllBytes(outputFilePath);
-            Directory.Delete(tempFolder, true);
-            return new FileContentResult(fileBytes, "video/mp4");
+            catch (Exception e)
+            {
+                log.LogError(e.Message);
+            }
+            finally
+            {
+                process.Dispose();
+            }
         }
 
-
-        private static string BuildFfmpegArguments(string tempFolder, string fileListPath, string outputFilePath)
+        private class SubtitleItem
         {
-            var ffmpegArgs = $"-f concat -safe 0 -i {{fileListPath}}";
-            // Loop through the downloaded files to check for matching .mp4 and .srt files
-            var files = Directory.GetFiles(tempFolder);
-            foreach (var file in files)
-            {
-                if (file.EndsWith(".mp4"))
-                {
-                    var subtitleFile = Path.ChangeExtension(file, ".srt");
-                    if (File.Exists(subtitleFile))
-                    {
-                        // If a matching subtitle file is found, add it to the FFmpeg command
-                        ffmpegArgs += $"-i \"{subtitleFile}\" ";
-                    }
-                }
-            }
+            public int Duration { get; set; }
+            public string Text { get; set; }
+        }
 
-            // Concatenate video files and embed subtitles
-            ffmpegArgs += "-c:v libx264 -c:a copy -c:s mov_text ";
-            foreach (var file in files.Where(f => f.EndsWith(".srt")))
-            {
-                var languageCode = "no"; // Assuming 'no' for Norwegian subtitles; modify as needed
-                ffmpegArgs += $"-metadata:s:s:0 language={languageCode} -metadata:s:s:0 title=Question ";
-            }
-
-            // Specify the output file
-            ffmpegArgs += $"\"{outputFilePath}\"";
-
-            return ffmpegArgs;
+        private static string FormatTimeSpan(TimeSpan timeSpan)
+        {
+            return timeSpan.ToString(@"hh\:mm\:ss\,fff");
         }
     }
 }
