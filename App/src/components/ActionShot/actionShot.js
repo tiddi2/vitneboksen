@@ -17,19 +17,19 @@ const ActionShot = () => {
   const [isActive, setIsActive] = useState(true);
   const recordTime = 5000;
   const waitTime = 30000;
-  const checkSharedSession = async () => {
-    if (sharedKey != null) setIsActive(await getSharedSession(sharedKey));
-  };
+
+  useEffect(() => {
+    if (sharedKey != null)
+      setIsActive(getSharedSession(sharedKey).then((res) => setIsActive(res)));
+  }, [sharedKey]);
 
   useEffect(() => {
     let parsed = queryString.parse(window.location.search);
     if (parsed?.session) {
       setSharedKey(parsed.session);
-      checkSharedSession();
     }
-
     if (parsed?.r) setReferral(parsed.r);
-  }, [checkSharedSession]);
+  }, []);
 
   useEffect(() => {
     return () => {
