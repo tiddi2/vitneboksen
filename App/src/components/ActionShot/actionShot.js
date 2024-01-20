@@ -74,7 +74,7 @@ const ActionShot = () => {
         await uploadActionShot(sharedKey, blob, fileName);
 
         if (referral) {
-          const { blob: srtBlob, fileName: srtFileName } = getSrtFile(
+          const { blob: srtBlob } = getSrtFile(
             recordTime / 1000,
             `Hilsen fra ${referral}}`
           );

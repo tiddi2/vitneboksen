@@ -144,7 +144,7 @@ const Home = () => {
             "mp4"
           );
 
-          const { blob: srtBlob, fileName: srtFileName } = getSrtFile(
+          const { blob: srtBlob } = getSrtFile(
             recordTime / 1000,
             currentQuestion
           );
@@ -152,7 +152,7 @@ const Home = () => {
           // Save video
           if (!sessionKey) {
             downoadFile(videoBlob, videoFileName);
-            downoadFile(srtBlob, srtFileName);
+            downoadFile(srtBlob, videoFileName.replace("mp4", "srt"));
           } else {
             // upload video
             await uploadTestemony(
