@@ -216,7 +216,7 @@ const Home = () => {
   };
 
   const handleKeyPress = (event) => {
-    if (event.key === "|") {
+    if (event.key === "m" || event.key ==="M" ) {
       setSettingsOpen((prev) => !prev);
     }
   };
