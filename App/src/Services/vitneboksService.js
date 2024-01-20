@@ -40,6 +40,26 @@ export async function getSession(existingSessionKey) {
   }
 }
 
+export async function getSharedSession(sharedKey) {
+  const urlWithQueryParam = `${process.env.REACT_APP_API}get-shared-session?sharedKey=${sharedKey}`;
+
+  // Make the GET request using fetch
+  const response = await fetch(urlWithQueryParam, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": window.location,
+      // You can add additional headers if needed
+    },
+  });
+
+  // Check if the request was successful
+  if (response.ok) {
+    return true;
+  }
+  return false;
+}
+
 export async function uploadTestemony(
   sessionKey,
   videofile,

@@ -5,7 +5,12 @@ import {
   uploadTestemony,
 } from "../../Services/vitneboksService";
 import "./home.css";
-import { GetRecordingConstrains, downoadFile, prepFile } from "../../utilities";
+import {
+  GetRecordingConstrains,
+  downoadFile,
+  getSrtFile,
+  prepFile,
+} from "../../utilities";
 
 const defaultQuestions = [
   "Hvordan føler du deg i dag etter dagens hendelser?",
@@ -139,13 +144,9 @@ const Home = () => {
             "mp4"
           );
 
-          const textFileContent = {
-            duration: recordTime / 1000,
-            text: currentQuestion,
-          };
-          const { blob: srtBlob, fileName: srtFileName } = prepFile(
-            [JSON.stringify(textFileContent)],
-            "json"
+          const { blob: srtBlob, fileName: srtFileName } = getSrtFile(
+            recordTime / 1000,
+            currentQuestion
           );
 
           // Save video
@@ -159,7 +160,7 @@ const Home = () => {
               videoBlob,
               videoFileName,
               srtBlob,
-              srtFileName
+              videoFileName.replace("mp4", "srt")
             );
           }
 

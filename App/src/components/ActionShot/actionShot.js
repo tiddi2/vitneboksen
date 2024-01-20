@@ -1,24 +1,35 @@
 import React, { useState, useEffect } from "react";
 import queryString from "query-string";
-import { uploadActionShot } from "../../Services/vitneboksService";
+import {
+  getSharedSession,
+  uploadActionShot,
+} from "../../Services/vitneboksService";
 import "./actionShot.css";
-import { GetRecordingConstrains, prepFile } from "../../utilities";
+import { GetRecordingConstrains, getSrtFile, prepFile } from "../../utilities";
 
 const ActionShot = () => {
   const [videoStream, setVideoStream] = useState(null);
   const [recording, setRecording] = useState(false);
   const [countdown, setCountdown] = useState();
   const [sharedKey, setSharedKey] = useState(null);
+  const [referral, setReferral] = useState(null);
   const [waiting, setWaiting] = useState(false);
-  const recordTime = 15000;
+  const [isActive, setIsActive] = useState(true);
+  const recordTime = 5000;
   const waitTime = 30000;
+  const checkSharedSession = async () => {
+    if (sharedKey != null) setIsActive(await getSharedSession(sharedKey));
+  };
 
   useEffect(() => {
     let parsed = queryString.parse(window.location.search);
     if (parsed?.session) {
       setSharedKey(parsed.session);
+      checkSharedSession();
     }
-  }, []);
+
+    if (parsed?.r) setReferral(parsed.r);
+  }, [checkSharedSession]);
 
   useEffect(() => {
     return () => {
@@ -60,8 +71,19 @@ const ActionShot = () => {
 
       recorder.onstop = async () => {
         const { blob, fileName } = prepFile(recordedChunks, "mp4");
-
         await uploadActionShot(sharedKey, blob, fileName);
+
+        if (referral) {
+          const { blob: srtBlob, fileName: srtFileName } = getSrtFile(
+            recordTime / 1000,
+            `Hilsen fra ${referral}}`
+          );
+          await uploadActionShot(
+            sharedKey,
+            srtBlob,
+            fileName.replace("mp4", "srt")
+          );
+        }
 
         if (videoStream) {
           videoStream.getTracks().forEach((track) => track.stop());
@@ -107,7 +129,13 @@ const ActionShot = () => {
     }
   };
 
-  return (
+  return isActive === false ? (
+    <div>
+      <h1>
+        Huffda, ser ut som denne vitneboksen ikke finnes, eller har blitt lukket
+      </h1>
+    </div>
+  ) : (
     <div
       style={{
         height: "100vh",
@@ -172,7 +200,7 @@ const ActionShot = () => {
             height: "100%",
             objectFit: "cover",
           }}
-          playsinline
+          playsInline
           muted
           autoPlay
         />
