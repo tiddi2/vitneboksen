@@ -15,7 +15,7 @@ const ActionShot = () => {
   const [referral, setReferral] = useState(null);
   const [waiting, setWaiting] = useState(false);
   const [isActive, setIsActive] = useState(true);
-  const recordTime = 5000;
+  const recordTime = 15000;
   const waitTime = 30000;
 
   useEffect(() => {
