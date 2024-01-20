@@ -217,7 +217,7 @@ const ActionShot = () => {
       >
         {!recording && !waiting && (
           <div>
-            <h3>Send inn en kul video av festen!</h3>
+            <h3>Send inn en kul video 😎</h3>
             <button
               onClick={startRecording}
               style={{
