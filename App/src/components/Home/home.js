@@ -255,7 +255,6 @@ const Home = () => {
     const trimmedArray = arrayOfStrings
       ?.map((str) => str.trim())
       .filter((str) => str !== "");
-    console.log(trimmedArray);
     return trimmedArray;
   };
 

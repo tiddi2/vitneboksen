@@ -17,14 +17,7 @@ export async function getSession(existingSessionKey) {
 
   try {
     // Make the GET request using fetch
-    const response = await fetch(urlWithQueryParam, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": window.location,
-        // You can add additional headers if needed
-      },
-    });
+    const response = await fetch(urlWithQueryParam, { method: "GET" });
 
     // Check if the request was successful
     if (!response.ok) {
@@ -32,7 +25,8 @@ export async function getSession(existingSessionKey) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     // Parse and return the response data
-    return await response.json();
+    const body = await response.json();
+    return body;
   } catch (error) {
     // Handle errors here
     console.error("Error:", error);
@@ -46,11 +40,6 @@ export async function getSharedSession(sharedKey) {
   // Make the GET request using fetch
   const response = await fetch(urlWithQueryParam, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": window.location,
-      // You can add additional headers if needed
-    },
   });
 
   // Check if the request was successful
@@ -89,10 +78,6 @@ export async function deleteSession(sessionKey) {
   try {
     await fetch(urlWithQueryParam, {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": window.location,
-      },
     });
   } catch (error) {
     console.log(error);
@@ -108,7 +93,6 @@ async function uploadFile(url, formData) {
     });
 
     if (response.ok) {
-      console.log("file successfully uploaded");
     } else {
       console.error("Failed to upload file");
     }

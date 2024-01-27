@@ -87,6 +87,10 @@ namespace Vitneboksen_func
             await ExcuteFFmpegCommand($"-f concat -safe 0 -i {fileListPath} -s 1920x1080 -qscale:v 1 -c:v copy -c:a aac {concatFilePath}", log);
 
 
+            // Working command: 
+            // ffmpeg - f concat - safe 0 - i fileList.txt - c:v libx264 -c:a aac concat_output.mp4
+
+
             // var outputFilePath = Path.Combine(tempFolder, "output.mp4");
             //await ExcuteFFmpegCommand($"-i {concatFilePath} -vf \"subtitles='{srtFilePath}'\" {concatFilePath}", log);
 
