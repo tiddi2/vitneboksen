@@ -115,7 +115,7 @@ const Testemony = () => {
 
   const startRecording = async () => {
     setStarted(true);
-    setCountdown((countdownTime + 1) / 1000);
+    setCountdown(countdownTime / 1000);
     try {
       let countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
