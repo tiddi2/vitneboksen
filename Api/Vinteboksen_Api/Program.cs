@@ -7,7 +7,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
                       {
-                          policy.WithOrigins("http://localhost:3000", "https://vitneboksen.no")
+                          policy.WithOrigins("https://192.168.100.153:3000", "https://localhost:3000", "http://localhost:3000", "https://vitneboksen.no")
                           .AllowAnyMethod();
                       });
 });
