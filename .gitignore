@@ -71,3 +71,4 @@ node_modules/
 bower_components/
 .env
 *.exe
+*ffmpeg

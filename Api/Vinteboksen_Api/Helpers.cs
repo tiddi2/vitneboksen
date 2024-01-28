@@ -30,13 +30,14 @@ public static class Helpers
         }
 
         return blobService.GetBlobContainerClient(container.Name);
+
     }
 
-    public static async Task ExcuteFFmpegCommand(string arguments, ILogger log)
+    public static async Task ExecuteFFmpegCommand(string arguments)
     {
         var ffmpegStartInfo = new ProcessStartInfo
         {
-            FileName = Path.Combine(Environment.CurrentDirectory, "ffmpeg.exe"),
+            FileName = Path.Combine(Environment.CurrentDirectory, OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg"),
             Arguments = arguments,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -44,22 +45,26 @@ public static class Helpers
             CreateNoWindow = true
         };
 
-        using (var process = new Process
-        {
-            StartInfo = ffmpegStartInfo
-        })
-        {
-            process.Start();
-            await process.WaitForExitAsync();
+        using var process = new Process { StartInfo = ffmpegStartInfo };
+        process.Start();
 
-            var output = await process.StandardOutput.ReadToEndAsync();
-            var error = await process.StandardError.ReadToEndAsync();
-            log.LogError(error);
-            if (process.ExitCode != 0)
-            {
-                throw new InvalidOperationException("FFmpeg failed with exit code: " + error);
-            }
-            process.Dispose();
+        // Asynchronously read the standard output and error
+        var outputReadTask = process.StandardOutput.ReadToEndAsync();
+        var errorReadTask = process.StandardError.ReadToEndAsync();
+
+        // Wait for the FFmpeg process to complete execution
+        await process.WaitForExitAsync();
+
+        // Now await the tasks for reading output and error
+        var output = await outputReadTask;
+        var error = await errorReadTask;
+
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException($"FFmpeg failed with exit code {process.ExitCode}. Error: {error}");
         }
+        Console.WriteLine(error);
+        Console.WriteLine(output);
     }
+
 }

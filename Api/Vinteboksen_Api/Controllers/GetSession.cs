@@ -1,26 +1,12 @@
 
 using Azure.Storage.Blobs;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Vitneboksen_func
 {
     public static class GetSession
     {
-        [FunctionName("get-session")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
-            ILogger log)
+        public static async Task<IResult> Run(HttpRequest req, string constring)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            var constring = Environment.GetEnvironmentVariable("StorageConnectionString");
             var blobService = new BlobServiceClient(constring);
 
             var sessionKey = req.Query["sessionKey"];
@@ -41,10 +27,10 @@ namespace Vitneboksen_func
             var blobs = containerClient.GetBlobs();
             var videoCount = blobs.Count(b => b.Name.Contains(".mp4") || b.Name.Contains(".webm"));
             var latestUploadTime = blobs.MaxBy(b => b.Properties.CreatedOn)?.Properties.CreatedOn;
-            return new OkObjectResult(new SessionStatus(sessionKey, sharingKey, videoCount, latestUploadTime));
+            return Results.Ok(new SessionStatus(sessionKey, sharingKey, videoCount, blobs.Any(b => b.Name == "concatenated.mp4"), latestUploadTime));
         }
     }
 
-    public record SessionStatus(string SessionKey, string SharingKey, int VideoCount, DateTimeOffset? LastUpload);
+    public record SessionStatus(string SessionKey, string SharingKey, int VideoCount, bool ConcatCompleted, DateTimeOffset? LastUpload);
 }
 

@@ -77,7 +77,7 @@ const Home = () => {
         : customQuestions
     );
     setCountdownTime(JSON.parse(localStorage.getItem("countdownTime")) || 3000);
-    setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 5000);
+    setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 15000);
     setWaitTime(JSON.parse(localStorage.getItem("waitTime")) || 30000);
     setQuestionsRawString(
       JSON.parse(localStorage.getItem("questionsRawString")) || ""
@@ -101,13 +101,10 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    return () => {
-      // Cleanup when the component unmounts
-      if (videoStream) {
-        videoStream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [videoStream]);
+    if (videoStream && !recording) {
+      videoStream.getTracks().forEach((track) => track.stop());
+    }
+  }, [recording, videoStream]);
 
   const startRecording = async () => {
     setStarted(true);
@@ -163,10 +160,6 @@ const Home = () => {
               videoFileName.replace("mp4", "srt")
             );
           }
-
-          if (videoStream) {
-            videoStream.getTracks().forEach((track) => track.stop());
-          }
         };
 
         // Assign the stream to the video element
@@ -196,7 +189,7 @@ const Home = () => {
           setRecording(false);
           setWaiting(true);
           videoElement.srcObject = null;
-
+          videoElement.src = null;
           setCountdown(waitTime / 1000);
 
           countdownInterval = setInterval(() => {
@@ -216,7 +209,7 @@ const Home = () => {
   };
 
   const handleKeyPress = (event) => {
-    if (event.key === "-" ) {
+    if (event.key === "-") {
       setSettingsOpen((prev) => !prev);
     }
   };

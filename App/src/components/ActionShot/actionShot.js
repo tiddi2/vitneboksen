@@ -32,13 +32,10 @@ const ActionShot = () => {
   }, []);
 
   useEffect(() => {
-    return () => {
-      // Cleanup when the component unmounts
-      if (videoStream) {
-        videoStream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [videoStream]);
+    if (videoStream && !recording) {
+      videoStream.getTracks().forEach((track) => track.stop());
+    }
+  }, [recording, videoStream]);
 
   const startRecording = async () => {
     setCountdown(recordTime / 1000);
