@@ -38,7 +38,7 @@ const App = () => {
           >
             Vitneboksen
           </h1>
-          <h2>Lag ditt eget realityprogram</h2>
+          <h2>Lag ditt eget realityshow</h2>
           <article style={{ marginTop: "2rem" }}>
             <p>Alt du trenger av utstyr er en PC eller Mac med webkamera.</p>
             <strong>Oppsett</strong>
