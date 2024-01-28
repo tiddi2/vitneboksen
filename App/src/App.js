@@ -24,6 +24,7 @@ const App = () => {
         <div
           style={{
             width: "45rem",
+            maxWidth: "99vw",
             margin: "auto",
             textAlign: "center",
           }}
