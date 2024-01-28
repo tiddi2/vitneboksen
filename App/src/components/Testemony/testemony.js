@@ -43,7 +43,6 @@ const Testemony = () => {
   const [sessionKey, setSessionKey] = useState(
     localStorage.getItem("sessionKey", null)
   );
-  const [sharedKey, setSharedKey] = useState(null);
   const [inputKey, setInputKey] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [countdownTime, setCountdownTime] = useState(3000);
@@ -68,7 +67,6 @@ const Testemony = () => {
         concatCompleted,
       } = await getOrCreateSession(sessionKey);
       if (newSessionKey) {
-        setSharedKey(newSharedKey);
         setSessionKey(newSessionKey);
         setLastUpload(lastUpload);
         setVideoCount(videoCount);
@@ -78,13 +76,13 @@ const Testemony = () => {
         localStorage.setItem("concatProcessStarted", false);
       }
     },
-    [sessionKey, inputKey, recording]
+    [inputKey, recording]
   );
 
   useEffect(() => {
     const intervalId = setInterval(() => GetSession(null), 25000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [GetSession]);
 
   useEffect(() => {
     document.addEventListener("keypress", handleKeyPress);
@@ -107,7 +105,7 @@ const Testemony = () => {
       JSON.parse(localStorage.getItem("questionsRawString")) || ""
     );
     if (sessionKey) GetSession(sessionKey);
-  }, []);
+  }, [GetSession]);
 
   useEffect(() => {
     if (videoStream && !recording) {
@@ -218,11 +216,11 @@ const Testemony = () => {
     }
   };
 
-  const handleKeyPress = useCallback(async (event) => {
+  const handleKeyPress = async (event) => {
     if (event.key === "-") {
       setSettingsOpen((prev) => !prev);
     }
-  });
+  };
 
   const deleteSessionClick = async () => {
     if (
@@ -232,7 +230,6 @@ const Testemony = () => {
     ) {
       await deleteSession(sessionKey);
       setSessionKey(null);
-      setSharedKey(null);
       setLastUpload(null);
       setVideoCount(null);
       localStorage.clear();

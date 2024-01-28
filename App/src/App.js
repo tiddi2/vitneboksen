@@ -20,7 +20,7 @@ const App = () => {
   return (
     <div>
       {sharedKey !== null && sharedKey && <ActionShot />}
-      {sharedKey !== null && sharedKey == false && closeTutorial === false && (
+      {sharedKey !== null && sharedKey === false && closeTutorial === false && (
         <div
           style={{
             width: "45rem",
@@ -120,7 +120,7 @@ const App = () => {
           </button>
         </div>
       )}
-      {sharedKey !== null && sharedKey == false && closeTutorial && (
+      {sharedKey !== null && sharedKey === false && closeTutorial && (
         <Testemony />
       )}
     </div>
