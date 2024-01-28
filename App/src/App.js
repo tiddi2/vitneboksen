@@ -68,8 +68,8 @@ const App = () => {
                 samme vitneboksen fra flere PCer.
               </li>
               <li>
-                <strong>Lukk kontrollpanelet</strong> bindestrek-tasten. Nå er
-                alt klart til å ta imot vitnesbyrd.
+                <strong>Lukk kontrollpanelet</strong> med bindestrek-tasten. Nå
+                er alt klart til å ta imot vitnesbyrd.
               </li>
             </ol>
             <strong>Avpilling</strong>
