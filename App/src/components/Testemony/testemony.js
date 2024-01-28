@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   deleteSession,
-  getSession,
+  getOrCreateSession,
   uploadTestemony,
+  generateConcatenatedVideo,
 } from "../../Services/vitneboksService";
 import "./testemony.css";
 import {
@@ -39,7 +40,9 @@ const Testemony = () => {
   const [countdown, setCountdown] = useState();
   const [started, setStarted] = useState(false);
   const [waiting, setWaiting] = useState(false);
-  const [sessionKey, setSessionKey] = useState(null);
+  const [sessionKey, setSessionKey] = useState(
+    localStorage.getItem("sessionKey", null)
+  );
   const [sharedKey, setSharedKey] = useState(null);
   const [inputKey, setInputKey] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -48,23 +51,40 @@ const Testemony = () => {
   const [waitTime, setWaitTime] = useState(30000);
   const [lastUpload, setLastUpload] = useState(null);
   const [videoCount, setVideoCount] = useState(null);
+  const [concatCompleted, setConcatCompleted] = useState(false);
+  const [concatProcessStarted, setConcatProcessStarted] = useState(false);
 
-  const GetSession = async (sessionKey = inputKey) => {
-    var {
-      sharingKey: newSharedKey,
-      sessionKey: newSessionKey,
-      videoCount,
-      lastUpload,
-    } = await getSession(sessionKey);
-    if (newSessionKey) {
-      setSharedKey(newSharedKey);
-      setSessionKey(newSessionKey);
-      setLastUpload(lastUpload);
-      setVideoCount(videoCount);
-      localStorage.setItem("sessionKey", newSessionKey);
-      localStorage.setItem("sharedKey", newSharedKey);
-    }
-  };
+  const GetSession = useCallback(
+    async (sessionKey = inputKey) => {
+      if (sessionKey == null) {
+        sessionKey = localStorage.getItem("sessionKey");
+      }
+      if (recording) return;
+      var {
+        sharingKey: newSharedKey,
+        sessionKey: newSessionKey,
+        videoCount,
+        lastUpload,
+        concatCompleted,
+      } = await getOrCreateSession(sessionKey);
+      if (newSessionKey) {
+        setSharedKey(newSharedKey);
+        setSessionKey(newSessionKey);
+        setLastUpload(lastUpload);
+        setVideoCount(videoCount);
+        setConcatCompleted(concatCompleted);
+        localStorage.setItem("sessionKey", newSessionKey);
+        localStorage.setItem("sharedKey", newSharedKey);
+        localStorage.setItem("concatProcessStarted", false);
+      }
+    },
+    [sessionKey, inputKey, recording]
+  );
+
+  useEffect(() => {
+    const intervalId = setInterval(() => GetSession(null), 25000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     document.addEventListener("keypress", handleKeyPress);
@@ -79,25 +99,14 @@ const Testemony = () => {
     setCountdownTime(JSON.parse(localStorage.getItem("countdownTime")) || 3000);
     setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 15000);
     setWaitTime(JSON.parse(localStorage.getItem("waitTime")) || 30000);
+    setConcatProcessStarted(
+      JSON.parse(localStorage.getItem("concatProcessStarted")) || false
+    );
+
     setQuestionsRawString(
       JSON.parse(localStorage.getItem("questionsRawString")) || ""
     );
-    const session = localStorage.getItem("sessionKey") || null;
-    if (session) {
-      getSession(session).then(
-        ({
-          sharingKey: newSharedKey,
-          sessionKey: newSessionKey,
-          videoCount,
-          lastUpload,
-        }) => {
-          setSharedKey(newSharedKey);
-          setSessionKey(newSessionKey);
-          setLastUpload(lastUpload);
-          setVideoCount(videoCount);
-        }
-      );
-    }
+    if (sessionKey) GetSession(sessionKey);
   }, []);
 
   useEffect(() => {
@@ -108,7 +117,7 @@ const Testemony = () => {
 
   const startRecording = async () => {
     setStarted(true);
-    setCountdown(countdownTime / 1000);
+    setCountdown((countdownTime + 1) / 1000);
     try {
       let countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
@@ -191,7 +200,8 @@ const Testemony = () => {
           videoElement.srcObject = null;
           videoElement.src = null;
           setCountdown(waitTime / 1000);
-
+          setConcatProcessStarted(false);
+          localStorage.setItem("concatProcessStarted", false);
           countdownInterval = setInterval(() => {
             setCountdown((prevCountdown) => prevCountdown - 1);
           }, 1000);
@@ -208,11 +218,11 @@ const Testemony = () => {
     }
   };
 
-  const handleKeyPress = (event) => {
+  const handleKeyPress = useCallback(async (event) => {
     if (event.key === "-") {
       setSettingsOpen((prev) => !prev);
     }
-  };
+  });
 
   const deleteSessionClick = async () => {
     if (
@@ -409,7 +419,7 @@ const Testemony = () => {
             position: "fixed",
             top: "5%",
             right: "5%",
-            width: "20rem",
+            width: "25rem",
             background: "rgba(25, 25, 25, 1)",
             boxShadow: "1px 1px 4px black",
             padding: "0.5rem 1rem",
@@ -507,22 +517,55 @@ const Testemony = () => {
                     className="button"
                     href={`${process.env.REACT_APP_API}download-session-files?sessionKey=${sessionKey}`}
                   >
-                    Last ned
+                    Last ned alle filer
                   </a>
                 </div>
               </label>
+              {videoCount > 1 && !concatCompleted && !concatProcessStarted && (
+                <label>
+                  <span>Generer Vitneboksvideo:</span>
+                  <button
+                    className="button"
+                    onClick={() => {
+                      setConcatProcessStarted(true);
+                      localStorage.setItem("concatProcessStarted", true);
+                      generateConcatenatedVideo(sessionKey);
+                    }}
+                  >
+                    Start generering
+                  </button>
+                </label>
+              )}
+              {!concatCompleted && concatProcessStarted && (
+                <label>
+                  <span>Ta deg en kaffe. Genereringen kan ta litt tid...</span>
+                </label>
+              )}
+              {videoCount > 1 && concatCompleted && (
+                <label>
+                  <span>Din vitneboksvideo er klar!</span>
+                  <a
+                    style={{ width: "4rem" }}
+                    className="button"
+                    href={`${process.env.REACT_APP_API}download-concatenated-video?sessionKey=${sessionKey}`}
+                  >
+                    Last ned
+                  </a>
+                </label>
+              )}
+
               <label>
                 Vitneboks-ID:
                 <input type="text" value={sessionKey} disabled={true} />
               </label>
-              <label>
+              {/*<label>
                 Link til deling:
                 <input
                   type="text"
                   value={`${window.location}?session=${sharedKey}`}
                   disabled={true}
                 />
-              </label>
+              </label>*/}
               {lastUpload && (
                 <label>
                   Siste opplasting:

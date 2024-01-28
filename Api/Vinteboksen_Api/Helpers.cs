@@ -1,7 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using System.Diagnostics;
 
-namespace Vitneboksen_func;
+namespace Vitneboksen_Api;
 public static class Helpers
 {
     public static BlobContainerClient? GetContainerBySessionKey(BlobServiceClient blobService, string sessionKey)

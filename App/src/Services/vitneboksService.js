@@ -7,7 +7,7 @@ function generateKey() {
 }
 
 // Function to make the GET request
-export async function getSession(existingSessionKey) {
+export async function getOrCreateSession(existingSessionKey) {
   // URL for the API endpoint
   const sessionKey = existingSessionKey || generateKey();
 
@@ -34,15 +34,25 @@ export async function getSession(existingSessionKey) {
   }
 }
 
+export async function generateConcatenatedVideo(sessionKey) {
+  const urlWithQueryParam = `${process.env.REACT_APP_API}create-concatenated-video?sessionKey=${sessionKey}`;
+  try {
+    await fetch(urlWithQueryParam, {
+      method: "GET",
+    });
+  } catch (error) {
+    console.log();
+  }
+  return true;
+}
+
 export async function getSharedSession(sharedKey) {
   const urlWithQueryParam = `${process.env.REACT_APP_API}get-shared-session?sharedKey=${sharedKey}`;
 
-  // Make the GET request using fetch
   const response = await fetch(urlWithQueryParam, {
     method: "GET",
   });
 
-  // Check if the request was successful
   if (response.ok) {
     return true;
   }

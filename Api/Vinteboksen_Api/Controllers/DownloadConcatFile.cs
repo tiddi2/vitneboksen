@@ -2,11 +2,11 @@ using Azure.Storage.Blobs;
 
 namespace Vitneboksen_Api.Controllers;
 
-public static class DeleteSession
+public static class DownloadConcatFile
 {
     public static async Task<IResult> Run(HttpRequest req, BlobServiceClient blobService)
     {
-        var sessionKey = req.Query["sessionKey"];
+        string sessionKey = req.Query["sessionKey"];
 
         var containerClient = Helpers.GetContainerBySessionKey(blobService, sessionKey);
         if (containerClient == null)
@@ -14,9 +14,9 @@ public static class DeleteSession
             return Results.NotFound("Not found");
         }
 
-        await containerClient.DeleteAsync();
+        var blob = containerClient.GetBlobClient(Constants.ConcatinatedVideoFileName);
+        var blobContent = await blob.DownloadContentAsync();
 
-        return Results.Ok("Deleted");
+        return Results.File(blobContent.Value.Content.ToStream(), "video/mp4", $"vitneboksen-{DateTime.Now.ToShortDateString()}.mp4");
     }
 }
-

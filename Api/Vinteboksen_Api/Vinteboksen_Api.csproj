@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <RootNamespace>Vinteboksen_Api</RootNamespace>
+    <RootNamespace>Vitneboksen_Api</RootNamespace>
     <UserSecretsId>fc45d321-0607-49d4-b267-2e5e41583ece</UserSecretsId>
   </PropertyGroup>
 
