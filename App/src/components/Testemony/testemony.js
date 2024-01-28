@@ -291,6 +291,7 @@ const Testemony = () => {
               display: "flex",
               background: "rgba(0,0,0,0.3)",
               padding: "1rem",
+              zIndex: 99,
             }}
           >
             <div
@@ -301,7 +302,6 @@ const Testemony = () => {
                 borderRadius: "50%",
                 backgroundColor: "red",
                 animation: "blinker 1s infinite",
-                zIndex: 3, // Higher zIndex to ensure it's on top
               }}
             />
             <div style={{ color: "white" }}>REC</div>
@@ -317,6 +317,7 @@ const Testemony = () => {
               display: "flex",
               background: "rgba(0,0,0,0.3)",
               padding: "1rem",
+              zIndex: 99,
             }}
           >
             {countdown}
@@ -329,6 +330,7 @@ const Testemony = () => {
             height: "94%",
             borderRadius: "6px",
             objectFit: "cover",
+            transform: "scaleX(-1)",
           }}
           autoPlay
         />

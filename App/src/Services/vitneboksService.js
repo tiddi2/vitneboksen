@@ -36,9 +36,7 @@ export async function getOrCreateSession(existingSessionKey) {
 
 export async function generateConcatenatedVideo(sessionKey) {
   const urlWithQueryParam = `${process.env.REACT_APP_API}create-concatenated-video?sessionKey=${sessionKey}`;
-  var response = await fetch(urlWithQueryParam, {
-    method: "GET",
-  });
+  var response = await fetch(urlWithQueryParam, { method: "GET" });
   if (response.ok) {
     return true;
   }
@@ -47,7 +45,6 @@ export async function generateConcatenatedVideo(sessionKey) {
 
 export async function getSharedSession(sharedKey) {
   const urlWithQueryParam = `${process.env.REACT_APP_API}get-shared-session?sharedKey=${sharedKey}`;
-
   const response = await fetch(urlWithQueryParam, {
     method: "GET",
   });
@@ -66,7 +63,6 @@ export async function uploadTestemony(
   subName
 ) {
   const urlWithQueryParam = `${process.env.REACT_APP_API}upload-testemony?sessionKey=${sessionKey}`;
-
   const formData = new FormData();
   formData.append("video", videofile, videoName);
   formData.append("sub", subfile, subName);
@@ -75,7 +71,6 @@ export async function uploadTestemony(
 
 export async function uploadActionShot(sharedKey, videofile, videoName) {
   const urlWithQueryParam = `${process.env.REACT_APP_API}upload-actionshot?sharedKey=${sharedKey}`;
-
   const formData = new FormData();
   formData.append("video", videofile, videoName);
   await uploadFile(urlWithQueryParam, formData);
@@ -100,12 +95,12 @@ async function uploadFile(url, formData) {
       method: "POST",
       body: formData,
     });
-
     if (response.ok) {
     } else {
       console.error("Failed to upload file");
     }
   } catch (error) {
+    alert(error);
     console.error("Error:", error);
   }
 }

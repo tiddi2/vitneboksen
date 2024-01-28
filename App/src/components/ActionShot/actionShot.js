@@ -5,14 +5,13 @@ import {
   uploadActionShot,
 } from "../../Services/vitneboksService";
 import "./actionShot.css";
-import { GetRecordingConstrains, getSrtFile, prepFile } from "../../utilities";
+import { GetRecordingConstrains, prepFile } from "../../utilities";
 
 const ActionShot = () => {
   const [videoStream, setVideoStream] = useState(null);
   const [recording, setRecording] = useState(false);
   const [countdown, setCountdown] = useState();
   const [sharedKey, setSharedKey] = useState(null);
-  const [referral, setReferral] = useState(null);
   const [waiting, setWaiting] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const recordTime = 10000;
@@ -28,7 +27,6 @@ const ActionShot = () => {
     if (parsed?.session) {
       setSharedKey(parsed.session);
     }
-    if (parsed?.r) setReferral(parsed.r);
   }, []);
 
   useEffect(() => {
@@ -67,24 +65,11 @@ const ActionShot = () => {
       };
 
       recorder.onstop = async () => {
-        const { blob, fileName } = prepFile(recordedChunks, "mp4");
-        await uploadActionShot(sharedKey, blob, fileName);
-
-        if (referral) {
-          const { blob: srtBlob } = getSrtFile(
-            recordTime / 1000,
-            `Hilsen fra ${referral}`
-          );
-          await uploadActionShot(
-            sharedKey,
-            srtBlob,
-            fileName.replace("mp4", "srt")
-          );
-        }
-
-        if (videoStream) {
-          videoStream.getTracks().forEach((track) => track.stop());
-        }
+        const { blob: videoBlob, fileName: videoFileName } = prepFile(
+          recordedChunks,
+          "mp4"
+        );
+        await uploadActionShot(sharedKey, videoBlob, videoFileName);
       };
 
       // Assign the stream to the video element
@@ -159,6 +144,7 @@ const ActionShot = () => {
               display: "flex",
               background: "rgba(0,0,0,0.3)",
               padding: "1rem",
+              zIndex: 99,
             }}
           >
             <div
@@ -169,7 +155,6 @@ const ActionShot = () => {
                 borderRadius: "50%",
                 backgroundColor: "red",
                 animation: "blinker 1s infinite",
-                zIndex: 3, // Higher zIndex to ensure it's on top
               }}
             />
             <div style={{ color: "white" }}>REC</div>
@@ -185,6 +170,7 @@ const ActionShot = () => {
               display: "flex",
               background: "rgba(0,0,0,0.3)",
               padding: "1rem",
+              zIndex: 99,
             }}
           >
             {countdown}
@@ -196,6 +182,7 @@ const ActionShot = () => {
             width: "100%",
             height: "100%",
             objectFit: "cover",
+            transform: "scaleX(-1)",
           }}
           playsInline
           muted
