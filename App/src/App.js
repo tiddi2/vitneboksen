@@ -67,6 +67,10 @@ const App = () => {
                 vare på vitneboks-ID'en din. Med den kan du koble deg på den
                 samme vitneboksen fra flere PCer.
               </li>
+              <li>
+                <strong>Lukk kontrollpanelet</strong> bindestrek-tasten. Nå er
+                alt klart til å ta imot vitnesbyrd.
+              </li>
             </ol>
             <strong>Avpilling</strong>
             <ol style={{ textAlign: "left" }}>
