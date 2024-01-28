@@ -105,7 +105,7 @@ const Testemony = () => {
       JSON.parse(localStorage.getItem("questionsRawString")) || ""
     );
     if (sessionKey) GetSession(sessionKey);
-  }, [GetSession]);
+  }, [GetSession, sessionKey]);
 
   useEffect(() => {
     if (videoStream && !recording) {
