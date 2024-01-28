@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import queryString from "query-string";
-import Home from "./components/Home/home";
+import Testemony from "./components/Testemony/testemony";
 import "./App.css";
 import ActionShot from "./components/ActionShot/actionShot";
 
@@ -17,7 +17,9 @@ const App = () => {
   }, []);
 
   return (
-    <div>{sharedKey !== null ? sharedKey ? <ActionShot /> : <Home /> : ""}</div>
+    <div>
+      {sharedKey !== null ? sharedKey ? <ActionShot /> : <Testemony /> : ""}
+    </div>
   );
 };
 

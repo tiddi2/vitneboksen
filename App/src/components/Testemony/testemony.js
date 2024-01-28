@@ -4,7 +4,7 @@ import {
   getSession,
   uploadTestemony,
 } from "../../Services/vitneboksService";
-import "./home.css";
+import "./testemony.css";
 import {
   GetRecordingConstrains,
   downoadFile,
@@ -30,7 +30,7 @@ const defaultQuestions = [
   "Hvordan tror du du vil se tilbake på denne opplevelsen når den er over?",
 ];
 
-const Home = () => {
+const Testemony = () => {
   const [videoStream, setVideoStream] = useState(null);
   const [recording, setRecording] = useState(false);
   const [question, setQuestion] = useState(null);
@@ -422,6 +422,8 @@ const Home = () => {
           <label>
             <span>Ventetid før opptak:</span>
             <input
+              min={1}
+              max={60}
               type="number"
               value={countdownTime / 1000}
               onChange={(e) => {
@@ -436,6 +438,8 @@ const Home = () => {
             <input
               type="number"
               value={recordTime / 1000}
+              max={30}
+              min={5}
               onChange={(e) => {
                 let value = parseInt(e.target.value, 10) * 1000;
                 setRecordTime(value);
@@ -448,6 +452,8 @@ const Home = () => {
             <input
               type="number"
               value={waitTime / 1000}
+              min={1}
+              max={600}
               onChange={(e) => {
                 let value = parseInt(e.target.value, 10) * 1000;
                 setWaitTime(value);
@@ -467,18 +473,27 @@ const Home = () => {
             }}
           />
           {sessionKey == null ? (
-            <label>
-              <span>Opprett ny vitneboks:</span>
-              <div>
-                <input
-                  type="text"
-                  style={{ width: "5rem" }}
-                  value={inputKey}
-                  onChange={(e) => setInputKey(e.target.value)}
-                />
-                <button onClick={() => GetSession()}>Opprett</button>
-              </div>
-            </label>
+            <React.Fragment>
+              <label>
+                <span>Opprett ny vitneboks:</span>
+                <button onClick={() => GetSession(null)}>Opprett ny</button>
+              </label>
+              <label>
+                <span>Har du allerede en vitneboks?</span>
+                <div>
+                  <input
+                    type="text"
+                    style={{ width: "5rem" }}
+                    value={inputKey}
+                    placeholder="vitnboks-ID"
+                    onChange={(e) => setInputKey(e.target.value)}
+                  />
+                  <button onClick={() => GetSession()}>
+                    Koble til eksisterende
+                  </button>
+                </div>
+              </label>
+            </React.Fragment>
           ) : (
             <div>
               <h3>Tilkobling</h3>
@@ -605,4 +620,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Testemony;
