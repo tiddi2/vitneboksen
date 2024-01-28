@@ -29,9 +29,6 @@ const App = () => {
             textAlign: "center",
           }}
         >
-          <p>
-            <strong>Host ditt eget realityprogram med</strong>
-          </p>
           <h1
             style={{
               margin: "1rem",
@@ -41,6 +38,7 @@ const App = () => {
           >
             Vitneboksen
           </h1>
+          <h2>Lag ditt eget realityprogram</h2>
           <article style={{ marginTop: "2rem" }}>
             <p>Alt du trenger av utstyr er en PC eller Mac med webkamera.</p>
             <strong>Oppsett</strong>
@@ -59,13 +57,13 @@ const App = () => {
                 fortsetter fra toppen etter siste spørsmål er vist.
               </li>
               <li>
-                <strong>Sett ønsket ventetid</strong>, som styrer hvor lenge
-                deltakerne må vente før de kan vitne på nytt
-              </li>
-              <li>
                 Klikk på knappen <strong>Opprett ny vitneboks,</strong> og ta
                 vare på vitneboks-ID'en din. Med den kan du koble deg på den
                 samme vitneboksen fra flere PCer.
+              </li>
+              <li>
+                Send <strong>delelinken</strong> til deltakerne dine, så de kan
+                sende inn egne videoer i tillegg til vitnesbyrdene.
               </li>
               <li>
                 <strong>Lukk kontrollpanelet</strong> med bindestrek-tasten. Nå

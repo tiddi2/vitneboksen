@@ -19,7 +19,11 @@ var blobService = new BlobServiceClient(storageConnectionString);
 
 app.MapPost("/upload-testemony", async Task<IResult> (HttpRequest request) => await UploadTestemony.Run(request, blobService));
 
+app.MapPost("/upload-actionshot", async Task<IResult> (HttpRequest request) => await UploadActionShot.Run(request, blobService));
+
 app.MapGet("/get-session", async Task<IResult> (HttpRequest request) => await GetSession.Run(request, blobService));
+
+app.MapGet("/get-shared-session", async Task<IResult> (HttpRequest request) => await GetSharedSession.Run(request, blobService));
 
 app.MapGet("/download-session-files", async Task<IResult> (HttpRequest request) => await DownloadSessionFiles.Run(request, blobService));
 

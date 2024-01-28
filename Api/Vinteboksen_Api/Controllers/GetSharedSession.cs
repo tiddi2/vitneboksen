@@ -15,7 +15,7 @@ public static class GetSharedSession
             return Results.NotFound("not found");
         }
 
-        return Results.Ok("Ok");
+        return Results.Ok();
     }
 }
 

@@ -20,7 +20,6 @@ button {
 }
 button,
 .button {
-  cursor: pointer;
   border-radius: 3px;
   border: none;
   color: rgb(0, 0, 0);
@@ -28,6 +27,12 @@ button,
   background-color: #fdb542;
   padding: 2% 4%;
   text-decoration: none;
+}
+button:disabled {
+  opacity: 0.6;
+}
+.button {
+  cursor: pointer;
 }
 .red {
   background: #b85b57;
@@ -43,4 +48,18 @@ button,
 
 ol li {
   margin-top: 0.5rem;
+}
+
+.spinner {
+  display: block;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

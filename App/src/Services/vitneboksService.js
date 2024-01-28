@@ -36,14 +36,13 @@ export async function getOrCreateSession(existingSessionKey) {
 
 export async function generateConcatenatedVideo(sessionKey) {
   const urlWithQueryParam = `${process.env.REACT_APP_API}create-concatenated-video?sessionKey=${sessionKey}`;
-  try {
-    await fetch(urlWithQueryParam, {
-      method: "GET",
-    });
-  } catch (error) {
-    console.log();
+  var response = await fetch(urlWithQueryParam, {
+    method: "GET",
+  });
+  if (response.ok) {
+    return true;
   }
-  return true;
+  return false;
 }
 
 export async function getSharedSession(sharedKey) {

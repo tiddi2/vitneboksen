@@ -43,6 +43,7 @@ const Testemony = () => {
   const [sessionKey, setSessionKey] = useState(
     localStorage.getItem("sessionKey", null)
   );
+  const [sharedKey, setSharedKey] = useState(null);
   const [inputKey, setInputKey] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [countdownTime, setCountdownTime] = useState(3000);
@@ -70,6 +71,7 @@ const Testemony = () => {
         setSessionKey(newSessionKey);
         setLastUpload(lastUpload);
         setVideoCount(videoCount);
+        setSharedKey(newSharedKey);
         setConcatCompleted(concatCompleted);
         localStorage.setItem("sessionKey", newSessionKey);
         localStorage.setItem("sharedKey", newSharedKey);
@@ -80,7 +82,7 @@ const Testemony = () => {
   );
 
   useEffect(() => {
-    const intervalId = setInterval(() => GetSession(null), 25000);
+    const intervalId = setInterval(() => GetSession(null), 60000);
     return () => clearInterval(intervalId);
   }, [GetSession]);
 
@@ -166,6 +168,7 @@ const Testemony = () => {
               srtBlob,
               videoFileName.replace("mp4", "srt")
             );
+            await GetSession(sessionKey);
           }
         };
 
@@ -190,7 +193,7 @@ const Testemony = () => {
           setCountdown((prevCountdown) => prevCountdown - 1);
         }, 1000);
 
-        setTimeout(() => {
+        setTimeout(async () => {
           clearInterval(countdownInterval);
           recorder.stop();
           setRecording(false);
@@ -204,7 +207,7 @@ const Testemony = () => {
             setCountdown((prevCountdown) => prevCountdown - 1);
           }, 1000);
 
-          setTimeout(() => {
+          setTimeout(async () => {
             clearInterval(countdownInterval);
             setWaiting(false);
             setStarted(false);
@@ -504,38 +507,25 @@ const Testemony = () => {
           ) : (
             <div>
               <h3>Tilkobling</h3>
-              <label>
-                <span>Antall vitnesbyrd:</span>
-                <div>
-                  {videoCount || 0}
-                  &nbsp; &nbsp;
-                  <a
-                    style={{ width: "4rem" }}
-                    className="button"
-                    href={`${process.env.REACT_APP_API}download-session-files?sessionKey=${sessionKey}`}
-                  >
-                    Last ned alle filer
-                  </a>
-                </div>
-              </label>
-              {videoCount > 1 && !concatCompleted && !concatProcessStarted && (
+              {videoCount > 1 && !concatCompleted && (
                 <label>
                   <span>Generer Vitneboksvideo:</span>
                   <button
                     className="button"
-                    onClick={() => {
+                    disabled={concatProcessStarted}
+                    onClick={async () => {
                       setConcatProcessStarted(true);
-                      localStorage.setItem("concatProcessStarted", true);
-                      generateConcatenatedVideo(sessionKey);
+                      await generateConcatenatedVideo(sessionKey);
+                      setConcatProcessStarted(false);
+                      GetSession(sessionKey);
                     }}
                   >
-                    Start generering
+                    {!concatProcessStarted ? (
+                      "Lag video"
+                    ) : (
+                      <span className="spinner">🤖</span>
+                    )}
                   </button>
-                </label>
-              )}
-              {!concatCompleted && concatProcessStarted && (
-                <label>
-                  <span>Ta deg en kaffe. Genereringen kan ta litt tid...</span>
                 </label>
               )}
               {videoCount > 1 && concatCompleted && (
@@ -550,26 +540,38 @@ const Testemony = () => {
                   </a>
                 </label>
               )}
-
               <label>
-                Vitneboks-ID:
-                <input type="text" value={sessionKey} disabled={true} />
+                <span>Antall vitnesbyrd:</span>
+                <div>
+                  {videoCount || 0}
+                  &nbsp; &nbsp;
+                  <a
+                    style={{ width: "4rem" }}
+                    className="button"
+                    href={`${process.env.REACT_APP_API}download-session-files?sessionKey=${sessionKey}`}
+                  >
+                    Last ned alle filer
+                  </a>
+                </div>
               </label>
-              {/*<label>
-                Link til deling:
-                <input
-                  type="text"
-                  value={`${window.location}?session=${sharedKey}`}
-                  disabled={true}
-                />
-              </label>*/}
               {lastUpload && (
                 <label>
                   Siste opplasting:
                   <span>{new Date(lastUpload).toLocaleString()}</span>
                 </label>
               )}
-
+              <label>
+                Vitneboks-ID:
+                <input type="text" value={sessionKey} disabled={true} />
+              </label>
+              <label>
+                Delelink:
+                <input
+                  type="text"
+                  value={`${window.location}?session=${sharedKey}`}
+                  disabled={true}
+                />
+              </label>
               <div>
                 <button className="red" onClick={deleteSessionClick}>
                   Slett vitneboks
