@@ -6,7 +6,9 @@ import ActionShot from "./components/ActionShot/actionShot";
 
 const App = () => {
   const [sharedKey, setSharedKey] = useState(null);
-  const [closeTutorial, setCloseTutorial] = useState(false);
+  const [closeTutorial, setCloseTutorial] = useState(
+    localStorage.getItem("sessionKey", null)
+  );
 
   useEffect(() => {
     let parsed = queryString.parse(window.location.search);
@@ -15,12 +17,39 @@ const App = () => {
     } else {
       setSharedKey(false);
     }
+    console.log(closeTutorial);
   }, []);
 
   return (
-    <div>
+    <main>
+      {closeTutorial && (
+        <button
+          style={{
+            boxSizing: "content-box",
+            display: "block",
+            height: "2rem",
+            width: "2rem",
+            lineHeight: "1rem",
+            borderRadius: "100%",
+            background: "none",
+            color: "white",
+            border: "1px solid white",
+            textAlign: "center",
+            cursor: "pointer",
+            padding: ".1rem",
+            fontSize: "1rem",
+            margin: "0.5rem",
+          }}
+          aria-label="Vis bruksanvisning"
+          onClick={() => {
+            setCloseTutorial((prev) => !prev);
+          }}
+        >
+          ?
+        </button>
+      )}
       {sharedKey !== null && sharedKey && <ActionShot />}
-      {sharedKey !== null && sharedKey === false && closeTutorial === false && (
+      {sharedKey !== null && sharedKey === false && !closeTutorial && (
         <div
           style={{
             width: "45rem",
@@ -126,7 +155,7 @@ const App = () => {
       {sharedKey !== null && sharedKey === false && closeTutorial && (
         <Testemony />
       )}
-    </div>
+    </main>
   );
 };
 

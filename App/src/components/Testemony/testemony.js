@@ -53,9 +53,11 @@ const Testemony = () => {
   const [videoCount, setVideoCount] = useState(null);
   const [concatCompleted, setConcatCompleted] = useState(false);
   const [concatProcessStarted, setConcatProcessStarted] = useState(false);
+  const [sessionWaiting, setSessionWaiting] = useState(false);
 
   const GetSession = useCallback(
     async (sessionKey = inputKey) => {
+      setSessionWaiting(true);
       if (sessionKey == null) {
         sessionKey = localStorage.getItem("sessionKey");
       }
@@ -77,14 +79,10 @@ const Testemony = () => {
         localStorage.setItem("sharedKey", newSharedKey);
         localStorage.setItem("concatProcessStarted", false);
       }
+      setSessionWaiting(false);
     },
     [inputKey, recording]
   );
-
-  useEffect(() => {
-    const intervalId = setInterval(() => GetSession(null), 60000);
-    return () => clearInterval(intervalId);
-  }, [GetSession]);
 
   useEffect(() => {
     document.addEventListener("keypress", handleKeyPress);
@@ -232,10 +230,10 @@ const Testemony = () => {
       )
     ) {
       await deleteSession(sessionKey);
+      localStorage.clear();
       setSessionKey(null);
       setLastUpload(null);
       setVideoCount(null);
-      localStorage.clear();
     }
   };
 
@@ -362,7 +360,7 @@ const Testemony = () => {
             Opptaket starter om {countdown} sekunder
           </div>
         )}
-        {!started && (
+        {!started && sessionKey && (
           <div>
             <h3>Velkommen til</h3>
             <h1
@@ -415,173 +413,218 @@ const Testemony = () => {
       </div>
 
       {settingsOpen && (
-        <div
+        <aside
           className="settings"
           style={{
             position: "fixed",
-            top: "5%",
-            right: "5%",
-            width: "25rem",
-            background: "rgba(25, 25, 25, 1)",
+            top: "5rem",
+            right: "0",
+            left: "0",
+            margin: "auto",
+            maxWidth: "42rem",
+            width: "50vw",
+            minWidth: "20rem",
+            minHeight: "40rem",
+            background: "rgba(25, 25, 25, 0.98)",
             boxShadow: "1px 1px 4px black",
-            padding: "0.5rem 1rem",
-            justifyItems: "flex-end",
-            borderRadius: "10px",
-            zIndex: 5,
+            padding: "1rem",
+            zIndex: 2,
           }}
         >
-          <h3>Konfigurasjon</h3>
-          <label>
-            <span>Ventetid før opptak:</span>
-            <input
-              min={1}
-              max={60}
-              type="number"
-              value={countdownTime / 1000}
-              onChange={(e) => {
-                let value = parseInt(e.target.value, 10) * 1000;
-                setCountdownTime(value);
-                localStorage.setItem("countdownTime", value);
-              }}
-            />
-          </label>
-          <label>
-            <span>Opptakstid:</span>
-            <input
-              type="number"
-              value={recordTime / 1000}
-              max={30}
-              min={5}
-              onChange={(e) => {
-                let value = parseInt(e.target.value, 10) * 1000;
-                setRecordTime(value);
-                localStorage.setItem("recordTime", value);
-              }}
-            />
-          </label>
-          <label>
-            <span>Ventetid etter opptak:</span>
-            <input
-              type="number"
-              value={waitTime / 1000}
-              min={1}
-              max={600}
-              onChange={(e) => {
-                let value = parseInt(e.target.value, 10) * 1000;
-                setWaitTime(value);
-                localStorage.setItem("waitTime", value);
-              }}
-            />
-          </label>
-          <span>Spørsmål (ett per linje)</span>
-          <textarea
-            onChange={handleTextareaChange}
-            value={questionsRawString}
+          <button
             style={{
-              width: "100%",
-              minHeight: "5rem",
-              color: "black",
-              textAlign: "left",
+              boxSizing: "content-box",
+              display: "block",
+              position: "absolute",
+              top: "1rem",
+              right: "1rem",
+              height: "2rem",
+              width: "2rem",
+              lineHeight: "1rem",
+              borderRadius: "100%",
+              background: "none",
+              color: "white",
+              border: "1px solid white",
+              textAlign: "center",
+              cursor: "pointer",
+              padding: ".1rem",
+              fontSize: "1rem",
             }}
-          />
-          {sessionKey == null ? (
-            <React.Fragment>
-              <label>
-                <span>Opprett ny vitneboks:</span>
-                <button onClick={() => GetSession(null)}>Opprett ny</button>
-              </label>
-              <label>
-                <span>Har du allerede en vitneboks?</span>
+            aria-label="Vis bruksanvisning"
+            onClick={() => {
+              setSettingsOpen(false);
+            }}
+          >
+            X
+          </button>
+          <div className="form">
+            <h3>Konfigurasjon</h3>
+            <div>
+              <span>Ventetid før opptak:</span>
+              <input
+                min={1}
+                max={60}
+                type="number"
+                value={countdownTime / 1000}
+                onChange={(e) => {
+                  let value = parseInt(e.target.value, 10) * 1000;
+                  setCountdownTime(value);
+                  localStorage.setItem("countdownTime", value);
+                }}
+              />
+            </div>
+            <div>
+              <span>Opptakstid:</span>
+              <input
+                type="number"
+                value={recordTime / 1000}
+                max={30}
+                min={5}
+                onChange={(e) => {
+                  let value = parseInt(e.target.value, 10) * 1000;
+                  setRecordTime(value);
+                  localStorage.setItem("recordTime", value);
+                }}
+              />
+            </div>
+            <div>
+              <span>Ventetid etter opptak:</span>
+              <input
+                type="number"
+                value={waitTime / 1000}
+                min={1}
+                max={600}
+                onChange={(e) => {
+                  let value = parseInt(e.target.value, 10) * 1000;
+                  setWaitTime(value);
+                  localStorage.setItem("waitTime", value);
+                }}
+              />
+            </div>
+
+            <span>Spørsmål (ett per linje)</span>
+            <textarea
+              onChange={handleTextareaChange}
+              value={questionsRawString}
+              style={{
+                width: "100%",
+                minHeight: "5rem",
+                color: "black",
+                textAlign: "left",
+              }}
+            />
+            {sessionKey == null ? (
+              <React.Fragment>
                 <div>
+                  <span>Opprett ny vitneboks:</span>
+                  <button onClick={() => GetSession(null)}>Opprett ny</button>
+                </div>
+                <div>
+                  <span>Har du allerede en vitneboks?</span>
+                  <div>
+                    <input
+                      type="text"
+                      style={{ width: "5rem" }}
+                      value={inputKey}
+                      placeholder="vitnboks-ID"
+                      onChange={(e) => setInputKey(e.target.value)}
+                    />
+                    <button onClick={() => GetSession()}>
+                      Koble til eksisterende
+                    </button>
+                  </div>
+                </div>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <div>
+                  <h3>
+                    Tilkobling
+                    <span
+                      className={`clickable ${sessionWaiting ? "spinner" : ""}`}
+                      onClick={() => GetSession()}
+                    >
+                      🔄️
+                    </span>
+                  </h3>
+                </div>
+                {videoCount > 1 && !concatCompleted && (
+                  <div>
+                    <span>Generer Vitneboksvideo:</span>
+                    <button
+                      className="button"
+                      disabled={concatProcessStarted}
+                      onClick={async () => {
+                        setConcatProcessStarted(true);
+                        await generateConcatenatedVideo(sessionKey);
+                        setConcatProcessStarted(false);
+                        GetSession(sessionKey);
+                      }}
+                    >
+                      {!concatProcessStarted ? (
+                        "Lag video"
+                      ) : (
+                        <span className="spinner">🤖</span>
+                      )}
+                    </button>
+                  </div>
+                )}
+                {videoCount > 1 && concatCompleted && (
+                  <div>
+                    <span>Din vitneboksvideo er klar!</span>
+                    <a
+                      style={{ width: "4rem" }}
+                      className="button"
+                      href={`${process.env.REACT_APP_API}download-concatenated-video?sessionKey=${sessionKey}`}
+                    >
+                      Last ned
+                    </a>
+                  </div>
+                )}
+                <div>
+                  <span>Antall vitnesbyrd:</span>
+                  <div>
+                    {videoCount || 0}
+                    &nbsp; &nbsp;
+                    <a
+                      style={{ width: "4rem" }}
+                      className="button"
+                      href={`${process.env.REACT_APP_API}download-session-files?sessionKey=${sessionKey}`}
+                    >
+                      Last ned alle filer
+                    </a>
+                  </div>
+                </div>
+
+                {lastUpload && (
+                  <div>
+                    <span>Siste opplasting:</span>
+                    <span>{new Date(lastUpload).toLocaleString()}</span>
+                  </div>
+                )}
+
+                <div>
+                  <span>Vitneboks-ID:</span>
+                  <input type="text" value={sessionKey} disabled={true} />
+                </div>
+                <div>
+                  <span>Delelink:</span>
                   <input
                     type="text"
-                    style={{ width: "5rem" }}
-                    value={inputKey}
-                    placeholder="vitnboks-ID"
-                    onChange={(e) => setInputKey(e.target.value)}
+                    value={`${window.location}?session=${sharedKey}`}
+                    disabled={true}
                   />
-                  <button onClick={() => GetSession()}>
-                    Koble til eksisterende
-                  </button>
                 </div>
-              </label>
-            </React.Fragment>
-          ) : (
-            <div>
-              <h3>Tilkobling</h3>
-              {videoCount > 1 && !concatCompleted && (
-                <label>
-                  <span>Generer Vitneboksvideo:</span>
-                  <button
-                    className="button"
-                    disabled={concatProcessStarted}
-                    onClick={async () => {
-                      setConcatProcessStarted(true);
-                      await generateConcatenatedVideo(sessionKey);
-                      setConcatProcessStarted(false);
-                      GetSession(sessionKey);
-                    }}
-                  >
-                    {!concatProcessStarted ? (
-                      "Lag video"
-                    ) : (
-                      <span className="spinner">🤖</span>
-                    )}
-                  </button>
-                </label>
-              )}
-              {videoCount > 1 && concatCompleted && (
-                <label>
-                  <span>Din vitneboksvideo er klar!</span>
-                  <a
-                    style={{ width: "4rem" }}
-                    className="button"
-                    href={`${process.env.REACT_APP_API}download-concatenated-video?sessionKey=${sessionKey}`}
-                  >
-                    Last ned
-                  </a>
-                </label>
-              )}
-              <label>
-                <span>Antall vitnesbyrd:</span>
                 <div>
-                  {videoCount || 0}
-                  &nbsp; &nbsp;
-                  <a
-                    style={{ width: "4rem" }}
-                    className="button"
-                    href={`${process.env.REACT_APP_API}download-session-files?sessionKey=${sessionKey}`}
-                  >
-                    Last ned alle filer
-                  </a>
+                  <span></span>
+                  <button className="red" onClick={deleteSessionClick}>
+                    Slett vitneboks
+                  </button>
                 </div>
-              </label>
-              {lastUpload && (
-                <label>
-                  Siste opplasting:
-                  <span>{new Date(lastUpload).toLocaleString()}</span>
-                </label>
-              )}
-              <label>
-                Vitneboks-ID:
-                <input type="text" value={sessionKey} disabled={true} />
-              </label>
-              <label>
-                Delelink:
-                <input
-                  type="text"
-                  value={`${window.location}?session=${sharedKey}`}
-                  disabled={true}
-                />
-              </label>
-              <div>
-                <button className="red" onClick={deleteSessionClick}>
-                  Slett vitneboks
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+              </React.Fragment>
+            )}
+          </div>
+        </aside>
       )}
       <div
         className="footer"

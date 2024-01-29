@@ -27,12 +27,14 @@ button,
   background-color: #fdb542;
   padding: 2% 4%;
   text-decoration: none;
+  box-sizing: content-box;
+  cursor: pointer;
+}
+.clickable {
+  cursor: pointer;
 }
 button:disabled {
   opacity: 0.6;
-}
-.button {
-  cursor: pointer;
 }
 .red {
   background: #b85b57;
@@ -51,7 +53,7 @@ ol li {
 }
 
 .spinner {
-  display: block;
+  display: inline-block;
   animation: spin 2s linear infinite;
 }
 

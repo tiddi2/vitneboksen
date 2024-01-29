@@ -43,16 +43,15 @@ public static class CreateConcatinatedVideo
             var file = File.OpenRead(concatFilePath);
             await containerClient.UploadBlobAsync(Constants.ConcatinatedVideoFileName, file);
             file.Close();
-            return Results.Ok();
         }
-        catch (Exception)
+        catch (Exception e)
         {
-
-            throw;
+            Console.WriteLine(e);
         }
         finally
         {
             Directory.Delete(tempPath, true);
         }
+        return Results.Ok();
     }
 }

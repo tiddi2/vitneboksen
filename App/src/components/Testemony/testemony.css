@@ -8,11 +8,19 @@ input[type="text"] {
   text-align: left;
 }
 
-.settings label {
+.settings .form > div {
   display: grid;
   grid-template-columns: 1fr 1fr;
   text-align: left;
   margin-bottom: 0.5rem;
   width: 100%;
   align-items: center;
+}
+.settings .form {
+  max-width: 40rem;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: space-evenly;
 }

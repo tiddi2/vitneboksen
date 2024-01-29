@@ -2,41 +2,33 @@ using Azure.Storage.Blobs;
 
 namespace Vitneboksen_Api.Controllers;
 
-public static class UploadTestemony
+public static class UploadActionShot
 {
     public static async Task<IResult> Run(HttpRequest req, BlobServiceClient blobService)
     {
-        string? sessionKey = req.Query["sessionKey"];
+        string sharedKey = req.Query["sharedKey"];
 
         var formdata = await req.ReadFormAsync();
         var videoFile = req.Form.Files.FirstOrDefault(f => f.Name == "video");
-        var subFile = req.Form.Files.FirstOrDefault(f => f.Name == "sub");
-        if (videoFile == null || subFile == null)
+        if (videoFile == null)
         {
             return Results.BadRequest("No file, stupid.");
         }
 
-        var containerClient = Helpers.GetContainerBySessionKey(blobService, sessionKey);
+        var containerClient = Helpers.GetContainerBySharedKey(blobService, sharedKey);
         if (containerClient == null)
         {
             return Results.NotFound("Not found");
         }
 
-
-        var tempFolder = $"vitne-{Guid.NewGuid()}";
+        var tempFolder = $"action-{Guid.NewGuid()}";
         var tempPath = Path.Combine(Environment.CurrentDirectory, tempFolder);
         Directory.CreateDirectory(tempPath);
         var videoFilePath = Path.Combine(tempPath, "file.mp4");
-        var subFilePath = Path.Combine(tempPath, "file.srt");
 
         using (var fileStream = new FileStream(videoFilePath, FileMode.Create))
         {
             await videoFile.CopyToAsync(fileStream);
-        }
-
-        using (var fileStream = new FileStream(subFilePath, FileMode.Create))
-        {
-            await subFile.CopyToAsync(fileStream);
         }
 
         try
@@ -44,8 +36,8 @@ public static class UploadTestemony
             var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}.mp4");
 
             var ffmpegCmd = OperatingSystem.IsWindows() ?
-            $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -c:v libx264 -c:a aac \"{outputFilePath}\""
-            : $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath}'\" -c:v libx264 -c:a aac \"{outputFilePath}\"";
+            $"-i \"{videoFilePath}\" -preset fast -c:v libx264 -c:a copy \"{outputFilePath}\""
+            : $"-i \"{videoFilePath}\" -preset fast -c:v libx264 -c:a copy \"{outputFilePath}\"";
 
             await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 
@@ -65,10 +57,11 @@ public static class UploadTestemony
             {
                 await blob.DeleteAsync();
             }
+
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            throw;
+            Console.WriteLine(e);
         }
         finally
         {

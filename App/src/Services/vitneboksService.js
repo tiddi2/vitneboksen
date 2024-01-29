@@ -100,7 +100,6 @@ async function uploadFile(url, formData) {
       console.error("Failed to upload file");
     }
   } catch (error) {
-    alert(error);
     console.error("Error:", error);
   }
 }
