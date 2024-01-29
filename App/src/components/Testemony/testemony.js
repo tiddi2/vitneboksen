@@ -54,6 +54,7 @@ const Testemony = () => {
   const [concatCompleted, setConcatCompleted] = useState(false);
   const [concatProcessStarted, setConcatProcessStarted] = useState(false);
   const [sessionWaiting, setSessionWaiting] = useState(false);
+  const [sessionFetchTime, setSessionFetchTime] = useState(null);
 
   const GetSession = useCallback(
     async (sessionKey = inputKey) => {
@@ -80,6 +81,7 @@ const Testemony = () => {
         localStorage.setItem("concatProcessStarted", false);
       }
       setSessionWaiting(false);
+      setSessionFetchTime(Date.now());
     },
     [inputKey, recording]
   );
@@ -538,15 +540,17 @@ const Testemony = () => {
             ) : (
               <React.Fragment>
                 <div>
-                  <h3>
-                    Tilkobling
+                  <h3>Tilkobling</h3>
+                  <span>
+                    Sist sjekket{" "}
+                    {new Date(sessionFetchTime).toLocaleTimeString()}{" "}
                     <span
                       className={`clickable ${sessionWaiting ? "spinner" : ""}`}
                       onClick={() => GetSession()}
                     >
                       🔄️
                     </span>
-                  </h3>
+                  </span>
                 </div>
                 {videoCount > 1 && !concatCompleted && (
                   <div>

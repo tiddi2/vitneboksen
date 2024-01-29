@@ -3,9 +3,11 @@ import queryString from "query-string";
 import Testemony from "./components/Testemony/testemony";
 import "./App.css";
 import ActionShot from "./components/ActionShot/actionShot";
-
+import ismobile from "is-mobile";
 const App = () => {
   const [sharedKey, setSharedKey] = useState(null);
+  const [hasCamera, setHasCamera] = useState(true);
+
   const [closeTutorial, setCloseTutorial] = useState(
     localStorage.getItem("sessionKey", null)
   );
@@ -17,8 +19,30 @@ const App = () => {
     } else {
       setSharedKey(false);
     }
-    console.log(closeTutorial);
+    if (closeTutorial) {
+      checkIfHasCamera().then(setHasCamera);
+    }
   }, [closeTutorial]);
+
+  const checkIfHasCamera = () => {
+    console.log("checking");
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      return false;
+    }
+
+    return navigator.mediaDevices
+      .enumerateDevices()
+      .then((devices) => {
+        const cameras = devices.filter(
+          (device) => device.kind === "videoinput"
+        );
+        return cameras.length > 0;
+      })
+      .catch((err) => {
+        console.error("Error accessing media devices:", err);
+        return false;
+      });
+  };
 
   return (
     <main>
@@ -135,26 +159,37 @@ const App = () => {
               </li>
             </ol>
           </article>
-          <button
-            onClick={() => setCloseTutorial(true)}
-            style={{
-              cursor: "pointer",
-              padding: "10px 20px",
-              fontSize: "16px",
-              borderRadius: "10px",
-              border: "none",
-              color: "#000",
-              outline: "none",
-              margin: "auto",
-            }}
-          >
-            Jeg skjønner, og er klar.
-          </button>
+          {!ismobile() && (
+            <button
+              onClick={() => {
+                setCloseTutorial(true);
+              }}
+              style={{
+                cursor: "pointer",
+                padding: "10px 20px",
+                fontSize: "16px",
+                borderRadius: "10px",
+                border: "none",
+                color: "#000",
+                outline: "none",
+                margin: "auto",
+              }}
+            >
+              Jeg skjønner, og er klar.
+            </button>
+          )}
         </div>
       )}
-      {sharedKey !== null && sharedKey === false && closeTutorial && (
-        <Testemony />
-      )}
+      {sharedKey !== null &&
+        sharedKey === false &&
+        closeTutorial &&
+        (hasCamera ? (
+          <Testemony />
+        ) : (
+          <h1>
+            Enten så har du ikke kamera eller så har du deaktivert det. 😤
+          </h1>
+        ))}
     </main>
   );
 };
