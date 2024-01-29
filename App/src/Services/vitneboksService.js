@@ -97,9 +97,11 @@ async function uploadFile(url, formData) {
     });
     if (response.ok) {
     } else {
+      alert(response.body.json());
       console.error("Failed to upload file");
     }
   } catch (error) {
+    alert(error);
     console.error("Error:", error);
   }
 }
