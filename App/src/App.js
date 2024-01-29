@@ -25,7 +25,6 @@ const App = () => {
   }, [closeTutorial]);
 
   const checkIfHasCamera = () => {
-    console.log("checking");
     if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
       return false;
     }

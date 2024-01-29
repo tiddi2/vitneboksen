@@ -88,6 +88,10 @@ const Testemony = () => {
 
   useEffect(() => {
     document.addEventListener("keypress", handleKeyPress);
+    setSettingsOpen(true);
+  }, []);
+
+  useEffect(() => {
     const customQuestions = JSON.parse(localStorage.getItem("questions"));
     setQuestions(
       customQuestions === undefined ||
@@ -106,7 +110,9 @@ const Testemony = () => {
     setQuestionsRawString(
       JSON.parse(localStorage.getItem("questionsRawString")) || ""
     );
-    if (sessionKey) GetSession(sessionKey);
+    if (sessionKey) {
+      GetSession(sessionKey);
+    }
   }, [GetSession, sessionKey]);
 
   useEffect(() => {
@@ -507,7 +513,7 @@ const Testemony = () => {
             <span>Spørsmål (ett per linje)</span>
             <textarea
               onChange={handleTextareaChange}
-              value={questionsRawString}
+              value={questionsRawString ?? ""}
               style={{
                 width: "100%",
                 minHeight: "5rem",
