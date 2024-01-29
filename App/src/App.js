@@ -18,7 +18,7 @@ const App = () => {
       setSharedKey(false);
     }
     console.log(closeTutorial);
-  }, []);
+  }, [closeTutorial]);
 
   return (
     <main>
@@ -68,7 +68,7 @@ const App = () => {
             Vitneboksen
           </h1>
           <h2>Lag ditt eget realityshow</h2>
-          <article style={{ marginTop: "2rem" }}>
+          <article style={{ margin: "2rem" }}>
             <p>Alt du trenger av utstyr er en PC eller Mac med webkamera.</p>
             <strong>Oppsett</strong>
             <ol style={{ textAlign: "left" }}>
