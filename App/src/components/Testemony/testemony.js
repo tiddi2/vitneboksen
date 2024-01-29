@@ -268,13 +268,7 @@ const Testemony = () => {
   };
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        width: "100vw",
-        position: "fixed",
-      }}
-    >
+    <div>
       <h1 style={{ margin: "1rem", textAlign: "center" }}>
         {started && !waiting && question}
       </h1>
@@ -597,7 +591,6 @@ const Testemony = () => {
                     {videoCount || 0}
                     &nbsp; &nbsp;
                     <a
-                      style={{ width: "4rem" }}
                       className="button"
                       href={`${process.env.REACT_APP_API}download-session-files?sessionKey=${sessionKey}`}
                     >

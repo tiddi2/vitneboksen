@@ -36,8 +36,8 @@ public static class UploadActionShot
             var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}.mp4");
 
             var ffmpegCmd = OperatingSystem.IsWindows() ?
-            $"-i \"{videoFilePath}\" -preset fast -c:v libx264 -c:a copy \"{outputFilePath}\""
-            : $"-i \"{videoFilePath}\" -preset fast -c:v libx264 -c:a copy \"{outputFilePath}\"";
+            $"-i \"{videoFilePath}\" -preset fast -c:v libx264 -c:a aac \"{outputFilePath}\""
+            : $"-i \"{videoFilePath}\" -preset fast -c:v libx264 -c:a aac \"{outputFilePath}\"";
 
             await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 

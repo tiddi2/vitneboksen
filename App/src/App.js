@@ -48,6 +48,7 @@ const App = () => {
       {closeTutorial && (
         <button
           style={{
+            position: "absolute",
             boxSizing: "content-box",
             display: "block",
             height: "2rem",
