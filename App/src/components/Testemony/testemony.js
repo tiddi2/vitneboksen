@@ -121,6 +121,14 @@ const Testemony = () => {
     }
   }, [recording, videoStream]);
 
+  const handleDownload = (url) => {
+    const link = document.createElement("a");
+    link.href = `${process.env.REACT_APP_API}${url}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const startRecording = async () => {
     setStarted(true);
     setCountdown(countdownTime / 1000);
@@ -576,13 +584,15 @@ const Testemony = () => {
                 {videoCount > 1 && concatCompleted && (
                   <div>
                     <span>Din vitneboksvideo er klar!</span>
-                    <a
-                      style={{ width: "4rem" }}
-                      className="button"
-                      href={`${process.env.REACT_APP_API}download-concatenated-video?sessionKey=${sessionKey}`}
+                    <button
+                      onClick={() =>
+                        handleDownload(
+                          `download-concatenated-video?sessionKey=${sessionKey}`
+                        )
+                      }
                     >
                       Last ned
-                    </a>
+                    </button>
                   </div>
                 )}
                 <div>
@@ -590,15 +600,17 @@ const Testemony = () => {
                   <div>
                     {videoCount || 0}
                     &nbsp; &nbsp;
-                    <a
-                      className="button"
-                      href={`${process.env.REACT_APP_API}download-session-files?sessionKey=${sessionKey}`}
+                    <button
+                      onClick={() =>
+                        handleDownload(
+                          `download-session-files?sessionKey=${sessionKey}`
+                        )
+                      }
                     >
                       Last ned alle filer
-                    </a>
+                    </button>
                   </div>
                 </div>
-
                 {lastUpload && (
                   <div>
                     <span>Siste opplasting:</span>

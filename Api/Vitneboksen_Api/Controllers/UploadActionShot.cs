@@ -24,17 +24,23 @@ public static class UploadActionShot
         var tempPath = Path.Combine(Environment.CurrentDirectory, tempFolder);
         Directory.CreateDirectory(tempPath);
         var videoFilePath = Path.Combine(tempPath, "file.mp4");
+        var subFilePath = Path.Combine(tempPath, "file.srt");
 
         using (var fileStream = new FileStream(videoFilePath, FileMode.Create))
         {
             await videoFile.CopyToAsync(fileStream);
         }
 
+        var srtContent = "1\n00:00:00,000 --> 00:00:05,000\nhello\n";
+        File.WriteAllText(subFilePath, srtContent);
+
         try
         {
             var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}.mp4");
 
-            var ffmpegCmd = $"-i \"{videoFilePath}\" -c:v mpeg4 -qscale:v 1 -c:a aac \"{outputFilePath}\"";
+            var ffmpegCmd = OperatingSystem.IsWindows() ?
+                        $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -qscale:v 1 -c:v mpeg4 -c:a aac \"{outputFilePath}\""
+                        : $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath}'\" -c:v mpeg4 -r 30 -qscale:v 1 -c:a aac \"{outputFilePath}\"";
 
             await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 
