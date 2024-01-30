@@ -286,7 +286,9 @@ const Testemony = () => {
           overflow: "hidden",
           margin: "auto",
           width: "80%",
-          height: "90%", // Adjusted height to make space for buttons
+          height: "90%",
+          maxWidth: "110rem",
+          margin: "auto",
         }}
       >
         {recording && (
