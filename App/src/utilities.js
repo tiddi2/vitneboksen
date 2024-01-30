@@ -1,8 +1,8 @@
 export const GetRecordingConstrains = async (ismobile = false) => {
   let constraints = {
     video: {
-      width: { ideal: ismobile ? 480 : 1920 },
-      height: { ideal: ismobile ? 854 : 1080 },
+      width: { ideal: ismobile ? 720 : 1920 },
+      height: { ideal: ismobile ? 1280 : 1080 },
       frameRate: { ideal: 30 },
     },
     audio: {
