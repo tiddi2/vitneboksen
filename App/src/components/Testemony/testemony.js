@@ -531,7 +531,6 @@ const Testemony = () => {
                 </div>
                 <div>
                   <span>Har du allerede en vitneboks?</span>
-                  &nbsp;
                   <div>
                     <input
                       type="text"
@@ -540,6 +539,7 @@ const Testemony = () => {
                       placeholder="vitnboks-ID"
                       onChange={(e) => setInputKey(e.target.value)}
                     />
+                    &nbsp;
                     <button onClick={() => GetSession()}>
                       Koble til eksisterende
                     </button>
