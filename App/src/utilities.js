@@ -10,6 +10,7 @@ export const GetRecordingConstrains = async () => {
       echoCancellation: false,
       autoGainControl: false,
     },
+    mimeType: "video/webm",
   };
 
   return constraints;

@@ -54,7 +54,9 @@ const ActionShot = () => {
 
       setVideoStream(stream);
 
-      const recorder = new MediaRecorder(stream);
+      const recorder = new MediaRecorder(stream, {
+        mimeType: "video/webm",
+      });
 
       const recordedChunks = [];
 

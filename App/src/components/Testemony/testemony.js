@@ -531,6 +531,7 @@ const Testemony = () => {
                 </div>
                 <div>
                   <span>Har du allerede en vitneboks?</span>
+                  &nbsp;
                   <div>
                     <input
                       type="text"

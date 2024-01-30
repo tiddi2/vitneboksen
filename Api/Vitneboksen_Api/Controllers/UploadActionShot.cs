@@ -31,7 +31,7 @@ public static class UploadActionShot
             await videoFile.CopyToAsync(fileStream);
         }
 
-        var srtContent = "1\n00:00:00,000 --> 00:00:05,000\nhello\n";
+        var srtContent = "1\n00:00:00,000 --> 00:00:05,000\n \n";
         File.WriteAllText(subFilePath, srtContent);
 
         try
@@ -39,8 +39,8 @@ public static class UploadActionShot
             var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}.mp4");
 
             var ffmpegCmd = OperatingSystem.IsWindows() ?
-                        $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -qscale:v 1 -c:v mpeg4 -c:a aac \"{outputFilePath}\""
-                        : $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath}'\" -c:v mpeg4 -r 30 -qscale:v 1 -c:a aac \"{outputFilePath}\"";
+                        $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -c:v libx264 -c:a aac \"{outputFilePath}\""
+                        : $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath}'\" -c:v libx264 -r 30 -c:a aac \"{outputFilePath}\"";
 
             await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 
