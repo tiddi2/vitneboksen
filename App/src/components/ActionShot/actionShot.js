@@ -46,7 +46,7 @@ const ActionShot = () => {
       let stream;
 
       await navigator.mediaDevices
-        .getUserMedia(await GetRecordingConstrains(true))
+        .getUserMedia(await GetRecordingConstrains())
         .then((s) => {
           stream = s;
         })
