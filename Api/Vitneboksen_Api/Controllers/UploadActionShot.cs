@@ -1,11 +1,10 @@
-using Azure.Storage.Blobs;
-
 namespace Vitneboksen_Api.Controllers;
 
 public static class UploadActionShot
 {
-    public static async Task<IResult> Run(HttpRequest req, BlobServiceClient blobService)
+    public static async Task<IResult> Run(HttpRequest req, string constring)
     {
+        var blobService = new Azure.Storage.Blobs.BlobServiceClient(constring);
         string sharedKey = req.Query["sharedKey"];
 
         var formdata = await req.ReadFormAsync();
@@ -35,9 +34,7 @@ public static class UploadActionShot
         {
             var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}.mp4");
 
-            var ffmpegCmd = OperatingSystem.IsWindows() ?
-            $"-i \"{videoFilePath}\" -preset fast -c:v libx264 -c:a aac \"{outputFilePath}\""
-            : $"-i \"{videoFilePath}\" -preset fast -c:v libx264 -c:a aac \"{outputFilePath}\"";
+            var ffmpegCmd = $"-i \"{videoFilePath}\" -c:v mpeg4 -qscale:v 1 -c:a aac \"{outputFilePath}\"";
 
             await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 
@@ -58,10 +55,6 @@ public static class UploadActionShot
                 await blob.DeleteAsync();
             }
 
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
         }
         finally
         {

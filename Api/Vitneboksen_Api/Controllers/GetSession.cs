@@ -1,12 +1,11 @@
-
-using Azure.Storage.Blobs;
-
 namespace Vitneboksen_Api.Controllers;
 
 public static class GetSession
 {
-    public static async Task<IResult> Run(HttpRequest req, BlobServiceClient blobService)
+    public static async Task<IResult> Run(HttpRequest req, string constring)
     {
+        var blobService = new Azure.Storage.Blobs.BlobServiceClient(constring);
+
         var sessionKey = req.Query["sessionKey"];
         string sharingKey;
 

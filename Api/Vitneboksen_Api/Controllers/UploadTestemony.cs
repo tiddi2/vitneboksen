@@ -1,11 +1,10 @@
-using Azure.Storage.Blobs;
-
 namespace Vitneboksen_Api.Controllers;
 
 public static class UploadTestemony
 {
-    public static async Task<IResult> Run(HttpRequest req, BlobServiceClient blobService)
+    public static async Task<IResult> Run(HttpRequest req, string constring)
     {
+        var blobService = new Azure.Storage.Blobs.BlobServiceClient(constring);
         string? sessionKey = req.Query["sessionKey"];
 
         var formdata = await req.ReadFormAsync();
@@ -21,7 +20,6 @@ public static class UploadTestemony
         {
             return Results.NotFound("Not found");
         }
-
 
         var tempFolder = $"vitne-{Guid.NewGuid()}";
         var tempPath = Path.Combine(Environment.CurrentDirectory, tempFolder);
@@ -44,8 +42,8 @@ public static class UploadTestemony
             var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}.mp4");
 
             var ffmpegCmd = OperatingSystem.IsWindows() ?
-            $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -preset fast -c:v libx264 -c:a aac \"{outputFilePath}\""
-            : $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath}'\" -preset fast -c:v libx264 -c:a aac \"{outputFilePath}\"";
+            $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -c:v mpeg4 -c:a aac \"{outputFilePath}\""
+            : $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath}'\" -c:v mpeg4 -qscale:v 1 -c:a aac \"{outputFilePath}\"";
 
             await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 

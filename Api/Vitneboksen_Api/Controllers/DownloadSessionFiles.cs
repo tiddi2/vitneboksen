@@ -1,12 +1,13 @@
-using Azure.Storage.Blobs;
 using System.IO.Compression;
 
 namespace Vitneboksen_Api;
 
 public static class DownloadSessionFiles
 {
-    public static async Task<IResult> Run(HttpRequest req, BlobServiceClient blobService)
+    public static async Task<IResult> Run(HttpRequest req, string constring)
     {
+        var blobService = new Azure.Storage.Blobs.BlobServiceClient(constring);
+
         string sessionKey = req.Query["sessionKey"];
 
         var containerClient = Helpers.GetContainerBySessionKey(blobService, sessionKey);
