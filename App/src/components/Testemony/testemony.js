@@ -57,6 +57,9 @@ const Testemony = () => {
   const [concatProcessStarted, setConcatProcessStarted] = useState(false);
   const [sessionWaiting, setSessionWaiting] = useState(false);
   const [sessionFetchTime, setSessionFetchTime] = useState(null);
+  const [sessionName, setSessionName] = useState(
+    localStorage.getItem("sessionName", "")
+  );
 
   const GetSession = useCallback(
     async (sessionKey = inputKey) => {
@@ -429,7 +432,7 @@ const Testemony = () => {
           className="settings"
           style={{
             position: "fixed",
-            top: "5rem",
+            top: "2rem",
             right: "0",
             left: "0",
             margin: "auto",
@@ -564,6 +567,17 @@ const Testemony = () => {
                   </span>
                 </div>
                 <div>
+                  <span>Arrangementnavn:</span>
+                  <input
+                    type="test"
+                    value={sessionName}
+                    onChange={(e) => {
+                      setSessionName(e.target.value);
+                      localStorage.setItem("sessionName", e.target.value);
+                    }}
+                  />
+                </div>
+                <div>
                   <span>Antall videoer:</span>
                   <div>
                     <div
@@ -608,7 +622,10 @@ const Testemony = () => {
                         disabled={concatProcessStarted}
                         onClick={async () => {
                           setConcatProcessStarted(true);
-                          await generateConcatenatedVideo(sessionKey);
+                          await generateConcatenatedVideo(
+                            sessionKey,
+                            sessionName
+                          );
                           setConcatProcessStarted(false);
                           GetSession(sessionKey);
                         }}

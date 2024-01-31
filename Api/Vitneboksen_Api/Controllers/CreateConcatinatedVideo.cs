@@ -25,13 +25,28 @@ public static class CreateConcatinatedVideo
         var blobs = containerClient.GetBlobsAsync().ConfigureAwait(false);
         try
         {
+            var subFilePath = Path.Combine(tempPath, "intro.srt");
+
+            var srtContent = $"1\n00:00:03,650 --> 00:00:06,800\n{sessionName?.ToUpper() ?? string.Empty}\n";
+            File.WriteAllText(subFilePath, srtContent);
+
+            var introSourcePath = Path.Combine(tempPath, "intro.mp4");
+            var introDestinationPath = Path.Combine(tempPath, "intro-with-sub.mp4");
+
+            var blobClient = introContainerClient.GetBlobClient(Constants.IntroFileName);
+            await blobClient.DownloadToAsync(introSourcePath);
+            var ffmpegCmd = OperatingSystem.IsWindows() ?
+            $"-i \"{introSourcePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}:force_style='Alignment=10'\" -c:v libx264 -c:a copy \"{introDestinationPath}\""
+            : $"-i \"{introSourcePath}\" -vf \"subtitles='{subFilePath}:force_style='Alignment=10'\" -c:v libx264 -c:a copy \"{introDestinationPath}\"";
+            await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
+
             // Create a MemoryStream to store the zip file
             using var memoryStream = new MemoryStream();
 
             var fileListPath = Path.Combine(tempPath, "fileList.txt");
             using (var fileListWriter = new StreamWriter(fileListPath))
             {
-                await AddToFileList(fileListWriter, introContainerClient, Constants.IntroFileName, tempPath);
+                fileListWriter.WriteLine($"file '{introDestinationPath}'");
 
                 await foreach (var blobItem in blobs)
                 {
@@ -51,6 +66,7 @@ public static class CreateConcatinatedVideo
         }
         catch (Exception e)
         {
+            return Results.Problem(e.InnerException.Message);
             Console.WriteLine(e);
         }
         finally

@@ -34,8 +34,8 @@ export async function getOrCreateSession(existingSessionKey) {
   }
 }
 
-export async function generateConcatenatedVideo(sessionKey) {
-  const urlWithQueryParam = `${process.env.REACT_APP_API}create-concatenated-video?sessionKey=${sessionKey}`;
+export async function generateConcatenatedVideo(sessionKey, sessionName) {
+  const urlWithQueryParam = `${process.env.REACT_APP_API}create-concatenated-video?sessionKey=${sessionKey}&sessionName=${sessionName}`;
   var response = await fetch(urlWithQueryParam, { method: "GET" });
   if (response.ok) {
     return true;
