@@ -567,43 +567,6 @@ const Testemony = () => {
                     </span>
                   </span>
                 </div>
-                {testemonialCount + actionShotCount > 1 && !concatCompleted && (
-                  <div>
-                    <span>
-                      Vitneboksvideoen <br />- samle alle filene til én!
-                    </span>
-                    <button
-                      className="button"
-                      disabled={concatProcessStarted}
-                      onClick={async () => {
-                        setConcatProcessStarted(true);
-                        await generateConcatenatedVideo(sessionKey);
-                        setConcatProcessStarted(false);
-                        GetSession(sessionKey);
-                      }}
-                    >
-                      {!concatProcessStarted ? (
-                        "Lag video"
-                      ) : (
-                        <span className="spinner">🤖</span>
-                      )}
-                    </button>
-                  </div>
-                )}
-                {actionShotCount + testemonialCount > 1 && concatCompleted && (
-                  <div>
-                    <span>Din vitneboksvideo er klar!</span>
-                    <button
-                      onClick={() =>
-                        handleDownload(
-                          `download-concatenated-video?sessionKey=${sessionKey}`
-                        )
-                      }
-                    >
-                      Last ned
-                    </button>
-                  </div>
-                )}
                 <div>
                   <span>Antall videoer:</span>
                   <div>
@@ -628,7 +591,45 @@ const Testemony = () => {
                     <span>{new Date(lastUpload).toLocaleString()}</span>
                   </div>
                 )}
-
+                {testemonialCount + actionShotCount > 1 && !concatCompleted && (
+                  <div>
+                    <span>
+                      Vitneboksvideoen <br /> - Samle alle videoene til én fil.
+                    </span>
+                    <button
+                      className="button"
+                      disabled={concatProcessStarted}
+                      onClick={async () => {
+                        setConcatProcessStarted(true);
+                        await generateConcatenatedVideo(sessionKey);
+                        setConcatProcessStarted(false);
+                        GetSession(sessionKey);
+                      }}
+                    >
+                      {!concatProcessStarted ? (
+                        "Lag video"
+                      ) : (
+                        <span className="spinner">🤖</span>
+                      )}
+                    </button>
+                  </div>
+                )}
+                {actionShotCount + testemonialCount > 1 && concatCompleted && (
+                  <div>
+                    <span>
+                      Vitneboksvideoen <br /> - Samle alle videoene til én fil.
+                    </span>
+                    <button
+                      onClick={() =>
+                        handleDownload(
+                          `download-concatenated-video?sessionKey=${sessionKey}`
+                        )
+                      }
+                    >
+                      Last ned
+                    </button>
+                  </div>
+                )}
                 <div>
                   <span>Vitneboks-ID:</span>
                   <input type="text" value={sessionKey} disabled={true} />

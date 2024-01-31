@@ -25,7 +25,7 @@ public static class GetSession
         var testemonials = blobs.Count(b => b.Name.Contains("testemonial.mp4"));
         var actionshots = blobs.Count(b => b.Name.Contains("actionshot.mp4"));
 
-        var latestUploadTime = blobs.MaxBy(b => b.Properties.CreatedOn)?.Properties.CreatedOn;
+        var latestUploadTime = blobs.Where(b => b.Name != Constants.ConcatinatedVideoFileName).MaxBy(b => b.Properties.CreatedOn)?.Properties.CreatedOn;
         return Results.Ok(new SessionStatus(sessionKey, sharingKey, testemonials, actionshots, blobs.Any(b => b.Name == Constants.ConcatinatedVideoFileName), latestUploadTime));
     }
 }
