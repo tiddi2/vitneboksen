@@ -8,6 +8,10 @@ input[type="text"] {
   text-align: left;
 }
 
+input[type="text"]:disabled {
+  background: white;
+}
+
 .settings .form > div {
   display: grid;
   grid-template-columns: 1fr 1fr;
