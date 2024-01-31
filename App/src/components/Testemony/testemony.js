@@ -50,7 +50,9 @@ const Testemony = () => {
   const [recordTime, setRecordTime] = useState(15000);
   const [waitTime, setWaitTime] = useState(30000);
   const [lastUpload, setLastUpload] = useState(null);
-  const [videoCount, setVideoCount] = useState(null);
+  const [testemonialCount, setTestemonialCount] = useState(null);
+  const [actionShotCount, setActionShotCount] = useState(null);
+
   const [concatCompleted, setConcatCompleted] = useState(false);
   const [concatProcessStarted, setConcatProcessStarted] = useState(false);
   const [sessionWaiting, setSessionWaiting] = useState(false);
@@ -66,14 +68,16 @@ const Testemony = () => {
       var {
         sharingKey: newSharedKey,
         sessionKey: newSessionKey,
-        videoCount,
+        testemonials,
+        actionshots,
         lastUpload,
         concatCompleted,
       } = await getOrCreateSession(sessionKey);
       if (newSessionKey) {
         setSessionKey(newSessionKey);
         setLastUpload(lastUpload);
-        setVideoCount(videoCount);
+        setActionShotCount(actionshots);
+        setTestemonialCount(testemonials);
         setSharedKey(newSharedKey);
         setConcatCompleted(concatCompleted);
         localStorage.setItem("sessionKey", newSessionKey);
@@ -249,7 +253,8 @@ const Testemony = () => {
       localStorage.clear();
       setSessionKey(null);
       setLastUpload(null);
-      setVideoCount(null);
+      setActionShotCount(null);
+      setTestemonialCount(null);
     }
   };
 
@@ -562,7 +567,7 @@ const Testemony = () => {
                     </span>
                   </span>
                 </div>
-                {videoCount > 1 && !concatCompleted && (
+                {testemonialCount + actionShotCount > 1 && !concatCompleted && (
                   <div>
                     <span>Generer Vitneboksvideo:</span>
                     <button
@@ -583,7 +588,7 @@ const Testemony = () => {
                     </button>
                   </div>
                 )}
-                {videoCount > 1 && concatCompleted && (
+                {actionShotCount + testemonialCount > 1 && concatCompleted && (
                   <div>
                     <span>Din vitneboksvideo er klar!</span>
                     <button
@@ -598,19 +603,21 @@ const Testemony = () => {
                   </div>
                 )}
                 <div>
-                  <span>Antall vitnesbyrd:</span>
+                  <span>Antall videoer:</span>
                   <div>
-                    {videoCount || 0}
-                    &nbsp; &nbsp;
-                    <button
-                      onClick={() =>
-                        handleDownload(
-                          `download-session-files?sessionKey=${sessionKey}`
-                        )
-                      }
-                    >
-                      Last ned alle filer
-                    </button>
+                    <div>
+                      <p>Vitnesbyrd: {testemonialCount}</p>
+                      <p>Fra delelink: {actionShotCount}</p>
+                      <button
+                        onClick={() =>
+                          handleDownload(
+                            `download-session-files?sessionKey=${sessionKey}`
+                          )
+                        }
+                      >
+                        Last ned alle filer
+                      </button>
+                    </div>
                   </div>
                 </div>
                 {lastUpload && (

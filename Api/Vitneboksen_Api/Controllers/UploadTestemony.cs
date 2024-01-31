@@ -39,11 +39,11 @@ public static class UploadTestemony
 
         try
         {
-            var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}.mp4");
+            var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}-testemonial.mp4");
 
             var ffmpegCmd = OperatingSystem.IsWindows() ?
-            $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -c:v libx264 -c:a aac \"{outputFilePath}\""
-            : $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath}'\" -c:v libx264 -r 30 -c:a aac \"{outputFilePath}\"";
+            $"-i \"{videoFilePath}\" -vf \"scale=-1:720,pad=1280:720:(1280-iw)/2:(720-ih)/2,subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -c:v libx264 -c:a aac \"{outputFilePath}\""
+            : $"-i \"{videoFilePath}\" -vf \"scale=-1:720,pad=1280:720:(1280-iw)/2:(720-ih)/2,subtitles='{subFilePath}'\" -c:v libx264 -r 30 -c:a aac \"{outputFilePath}\"";
 
             await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 

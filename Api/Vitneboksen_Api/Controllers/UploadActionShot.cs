@@ -31,16 +31,11 @@ public static class UploadActionShot
             await videoFile.CopyToAsync(fileStream);
         }
 
-        var srtContent = "1\n00:00:00,000 --> 00:00:05,000\n \n";
-        File.WriteAllText(subFilePath, srtContent);
-
         try
         {
-            var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}.mp4");
+            var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}-actionshot.mp4");
 
-            var ffmpegCmd = OperatingSystem.IsWindows() ?
-                        $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -c:v libx264 -c:a aac \"{outputFilePath}\""
-                        : $"-i \"{videoFilePath}\" -vf \"subtitles='{subFilePath}'\" -c:v libx264 -r 30 -c:a aac \"{outputFilePath}\"";
+            var ffmpegCmd = $"-i \"{videoFilePath}\" -vf \"scale=-1:720,pad=1280:720:(1280-iw)/2:(720-ih)/2\" -r 30 -c:v libx264 -c:a aac \"{outputFilePath}\"";
 
             await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 

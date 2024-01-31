@@ -50,7 +50,7 @@ const ActionShot = () => {
         .then((s) => {
           stream = s;
         })
-        .catch((e) => alert(e));
+        .catch((e) => console.error(e));
 
       setVideoStream(stream);
 
@@ -107,7 +107,6 @@ const ActionShot = () => {
       }, recordTime); // Record
     } catch (error) {
       console.error("Error accessing webcam:", error);
-      alert(error);
     }
   };
 
