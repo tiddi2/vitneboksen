@@ -569,7 +569,9 @@ const Testemony = () => {
                 </div>
                 {testemonialCount + actionShotCount > 1 && !concatCompleted && (
                   <div>
-                    <span>Vitneboksvideoen - samle alle filene til én!</span>
+                    <span>
+                      Vitneboksvideoen <br />- samle alle filene til én!
+                    </span>
                     <button
                       className="button"
                       disabled={concatProcessStarted}
