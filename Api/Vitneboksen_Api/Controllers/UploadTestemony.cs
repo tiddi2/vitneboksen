@@ -42,8 +42,8 @@ public static class UploadTestemony
             var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}-testemonial.mp4");
 
             var ffmpegCmd = OperatingSystem.IsWindows() ?
-            $"-i \"{videoFilePath}\" -vf \"scale=-1:1080,pad=1920:1080:(1920-iw)/2:(1080-ih)/2,subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -c:v libx264 -c:a aac -ar 48000  \"{outputFilePath}\""
-            : $"-i \"{videoFilePath}\" -vf \"scale=-1:1080,pad=1920:1080:(1920-iw)/2:(1080-ih)/2,subtitles='{subFilePath}'\" -c:v libx264 -r 30 -c:a aac -ar 48000 \"{outputFilePath}\"";
+            $"-i \"{videoFilePath}\" -filter:a \"volume=3\" -vf \"scale=-1:1080,pad=1920:1080:(1920-iw)/2:(1080-ih)/2,subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -c:v libx264 -c:a aac -ar 48000  \"{outputFilePath}\""
+            : $"-i \"{videoFilePath}\" -filter:a \"volume=3\" -vf \"scale=-1:1080,pad=1920:1080:(1920-iw)/2:(1080-ih)/2,subtitles='{subFilePath}'\" -c:v libx264 -r 30 -c:a aac -ar 48000 \"{outputFilePath}\"";
 
             await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 

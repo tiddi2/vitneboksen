@@ -35,7 +35,7 @@ public static class UploadActionShot
         {
             var outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}-actionshot.mp4");
 
-            var ffmpegCmd = $"-i \"{videoFilePath}\" -vf \"scale=-1:720,pad=1280:720:(1280-iw)/2:(720-ih)/2\" -r 30 -c:v libx264 -c:a aac -ar 48000 \"{outputFilePath}\"";
+            var ffmpegCmd = $"-i \"{videoFilePath}\" -filter:a \"volume=3\" -vf \"scale=-1:720,pad=1280:720:(1280-iw)/2:(720-ih)/2\" -r 30 -c:v libx264 -c:a aac -ar 48000 \"{outputFilePath}\"";
 
             await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 
