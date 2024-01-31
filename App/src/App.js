@@ -48,7 +48,6 @@ const App = () => {
       {closeTutorial && (
         <button
           style={{
-            position: "absolute",
             boxSizing: "content-box",
             display: "block",
             height: "2rem",
@@ -63,6 +62,7 @@ const App = () => {
             padding: ".1rem",
             fontSize: "1rem",
             margin: "0.5rem",
+            opacity: "0.5",
           }}
           aria-label="Vis bruksanvisning"
           onClick={() => {

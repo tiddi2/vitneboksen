@@ -292,7 +292,7 @@ const Testemony = () => {
           margin: "auto",
           width: "80%",
           height: "90%",
-          maxWidth: "110rem",
+          maxWidth: "80rem",
         }}
       >
         {recording && (
@@ -340,8 +340,8 @@ const Testemony = () => {
         <video
           id="video"
           style={{
-            width: "99%",
-            height: "94%",
+            width: "100%",
+            maxWidth: "80rem",
             borderRadius: "6px",
             objectFit: "cover",
             transform: "scaleX(-1)",
@@ -378,7 +378,6 @@ const Testemony = () => {
         )}
         {!started && sessionKey && (
           <div>
-            <h3>Velkommen til</h3>
             <h1
               style={{
                 margin: "1rem",
@@ -386,12 +385,9 @@ const Testemony = () => {
                 textAlign: "center",
               }}
             >
-              Vitneboksen
+              VITNEBOKSEN
             </h1>
-            <h3>
-              Svar på spørsmålet som dukker opp, og husk at ærlighet varer
-              lengst
-            </h3>
+            <h3>Svar på spørsmålet som dukker opp, dette går fint.</h3>
             <button
               onClick={startRecording}
               style={{
@@ -441,7 +437,7 @@ const Testemony = () => {
             width: "50vw",
             minWidth: "20rem",
             minHeight: "40rem",
-            background: "rgba(25, 25, 25, 0.98)",
+            background: "rgb(14 26 64 / 98%)",
             boxShadow: "1px 1px 4px black",
             padding: "1rem",
             zIndex: 2,
@@ -570,9 +566,18 @@ const Testemony = () => {
                 <div>
                   <span>Antall videoer:</span>
                   <div>
-                    <div>
-                      <p>Vitnesbyrd: {testemonialCount}</p>
-                      <p>Fra delelink: {actionShotCount}</p>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                      }}
+                    >
+                      <div>
+                        <span>Vitnesbyrd: {testemonialCount}</span>
+                        <br />
+                        <span>Delelink: {actionShotCount}</span>
+                        <br />
+                      </div>
                       <button
                         onClick={() =>
                           handleDownload(
@@ -591,30 +596,32 @@ const Testemony = () => {
                     <span>{new Date(lastUpload).toLocaleString()}</span>
                   </div>
                 )}
-                {testemonialCount + actionShotCount > 1 && !concatCompleted && (
-                  <div>
-                    <span>
-                      Vitneboksvideoen <br /> - Samle alle videoene til én fil.
-                    </span>
-                    <button
-                      className="button"
-                      disabled={concatProcessStarted}
-                      onClick={async () => {
-                        setConcatProcessStarted(true);
-                        await generateConcatenatedVideo(sessionKey);
-                        setConcatProcessStarted(false);
-                        GetSession(sessionKey);
-                      }}
-                    >
-                      {!concatProcessStarted ? (
-                        "Lag video"
-                      ) : (
-                        <span className="spinner">🤖</span>
-                      )}
-                    </button>
-                  </div>
-                )}
-                {actionShotCount + testemonialCount > 1 && concatCompleted && (
+                {testemonialCount + actionShotCount >= 1 &&
+                  !concatCompleted && (
+                    <div>
+                      <span>
+                        Vitneboksvideoen <br /> - Samle alle videoene til én
+                        fil.
+                      </span>
+                      <button
+                        className="button"
+                        disabled={concatProcessStarted}
+                        onClick={async () => {
+                          setConcatProcessStarted(true);
+                          await generateConcatenatedVideo(sessionKey);
+                          setConcatProcessStarted(false);
+                          GetSession(sessionKey);
+                        }}
+                      >
+                        {!concatProcessStarted ? (
+                          "Lag video"
+                        ) : (
+                          <span className="spinner">🤖</span>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                {actionShotCount + testemonialCount >= 1 && concatCompleted && (
                   <div>
                     <span>
                       Vitneboksvideoen <br /> - Samle alle videoene til én fil.

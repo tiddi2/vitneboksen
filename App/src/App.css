@@ -10,7 +10,7 @@ h1 {
   text-align: center;
 }
 html {
-  background-color: #1c323a;
+  background-color: #5743c9;
 }
 
 div {
@@ -20,6 +20,7 @@ div {
 input,
 button {
   color: black;
+  border-radius: 3px;
 }
 button,
 .button {
