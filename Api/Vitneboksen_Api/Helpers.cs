@@ -46,25 +46,21 @@ public static class Helpers
         };
 
         using var process = new Process { StartInfo = ffmpegStartInfo };
+
+        process.OutputDataReceived += new DataReceivedEventHandler(
+            (s, e) =>
+            {
+            }
+        );
+        process.ErrorDataReceived += new DataReceivedEventHandler(
+            (s, e) =>
+            {
+            }
+        );
         process.Start();
-
-        // Asynchronously read the standard output and error
-        var outputReadTask = process.StandardOutput.ReadToEndAsync();
-        var errorReadTask = process.StandardError.ReadToEndAsync();
-
-        // Wait for the FFmpeg process to complete execution
-        await process.WaitForExitAsync();
-
-        // Now await the tasks for reading output and error
-        var output = await outputReadTask;
-        var error = await errorReadTask;
-
-        if (process.ExitCode != 0)
-        {
-            throw new InvalidOperationException($"FFmpeg failed with exit code {process.ExitCode}. Error: {error}");
-        }
-        Console.WriteLine(error);
-        Console.WriteLine(output);
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+        process.WaitForExit();
     }
 
 }
