@@ -6,7 +6,7 @@ import ActionShot from "./components/ActionShot/actionShot";
 import ismobile from "is-mobile";
 const App = () => {
   const [sharedKey, setSharedKey] = useState(null);
-  const [hasCamera, setHasCamera] = useState(true);
+  //const [hasCamera, setHasCamera] = useState(true);
 
   const [closeTutorial, setCloseTutorial] = useState(
     localStorage.getItem("sessionKey", null)
@@ -19,9 +19,10 @@ const App = () => {
     } else {
       setSharedKey(false);
     }
-    if (closeTutorial) {
+    /*  if (closeTutorial) {
       checkIfHasCamera().then(setHasCamera);
     }
+    */
   }, [closeTutorial]);
 
   const checkIfHasCamera = () => {
