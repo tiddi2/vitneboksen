@@ -24,7 +24,7 @@ const App = () => {
     }
     */
   }, [closeTutorial]);
-
+  /*
   const checkIfHasCamera = () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
       return false;
@@ -43,7 +43,7 @@ const App = () => {
         return false;
       });
   };
-
+*/
   return (
     <main>
       {closeTutorial && (
