@@ -183,7 +183,7 @@ const App = () => {
       {sharedKey !== null &&
         sharedKey === false &&
         closeTutorial &&
-        (hasCamera ? (
+        (true ? (
           <Testemony />
         ) : (
           <h1>
