@@ -31,7 +31,7 @@ export const getSrtFile = (duration, text) => {
   return prepFile([srtContent], "srt");
 };
 
-export const downoadFile = (blob, fileName) => {
+export const downloadFile = (blob, fileName) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
