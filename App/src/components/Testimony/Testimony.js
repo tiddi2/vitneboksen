@@ -20,19 +20,15 @@ const Testimony = () => {
   const [recording, setRecording] = useState(false);
   const [question, setQuestion] = useState(null);
   const [questions, setQuestions] = useState([]);
-  const [questionsRawString, setQuestionsRawString] = useState();
   const [countdown, setCountdown] = useState();
   const [started, setStarted] = useState(false);
   const [waiting, setWaiting] = useState(false);
   const [sessionKey, setSessionKey] = useState(
     localStorage.getItem("sessionKey", null)
   );
-  console.log(questions);
   const [sharedKey, setSharedKey] = useState(null);
   const [inputKey, setInputKey] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [countdownTime, setCountdownTime] = useState(3000);
-  const [recordTime, setRecordTime] = useState(15000);
   const [waitTime, setWaitTime] = useState(30000);
   const [lastUpload, setLastUpload] = useState(null);
   const [testimonialCount, setTestimonialCount] = useState(null);
@@ -94,15 +90,9 @@ const Testimony = () => {
         ? defaultQuestions
         : customQuestions
     );
-    setCountdownTime(JSON.parse(localStorage.getItem("countdownTime")) || 3000);
-    setRecordTime(JSON.parse(localStorage.getItem("recordTime")) || 15000);
     setWaitTime(JSON.parse(localStorage.getItem("waitTime")) || 30000);
     setConcatProcessStarted(
       JSON.parse(localStorage.getItem("concatProcessStarted")) || false
-    );
-
-    setQuestionsRawString(
-      JSON.parse(localStorage.getItem("questionsRawString")) || ""
     );
     if (sessionKey) {
       GetSession(sessionKey);
@@ -117,14 +107,15 @@ const Testimony = () => {
 
   const startRecording = async () => {
     setStarted(true);
-    setCountdown(countdownTime / 1000);
+    let currentQuestion =
+      questions[(questions.indexOf(question) || 0) + 1] || questions[0];
+    setCountdown(currentQuestion.countdownTime / 1000);
     try {
       let countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
       }, 1000);
-      let currentQuestion =
-        questions[(questions.q.indexOf(question) || 0) + 1] || questions.q[0];
-      setQuestion(currentQuestion);
+      console.log(currentQuestion.q);
+      setQuestion(currentQuestion.q);
       setTimeout(async () => {
         clearInterval(countdownInterval);
 
@@ -150,7 +141,7 @@ const Testimony = () => {
           );
 
           const { blob: srtBlob } = getSrtFile(
-            recordTime / 1000,
+            currentQuestion.recordTime / 1000,
             currentQuestion
           );
 
@@ -186,7 +177,8 @@ const Testimony = () => {
         recorder.start();
 
         setRecording(true);
-        setCountdown(recordTime / 1000);
+        console.log(currentQuestion);
+        setCountdown(currentQuestion.recordTime / 1000);
 
         countdownInterval = setInterval(() => {
           setCountdown((prevCountdown) => prevCountdown - 1);
@@ -211,8 +203,8 @@ const Testimony = () => {
             setWaiting(false);
             setStarted(false);
           }, waitTime); //wait
-        }, recordTime); // Record
-      }, countdownTime); // Countdown
+        }, currentQuestion.recordTime); // Record
+      }, currentQuestion.countdownTime); // Countdown
     } catch (error) {
       console.error("Error accessing webcam:", error);
     }
@@ -385,16 +377,10 @@ const Testimony = () => {
 
       {settingsOpen && (
         <Settings
-          setQuestionsRawString={setQuestionsRawString}
           defaultQuestions={defaultQuestions}
           setSettingsOpen={setSettingsOpen}
-          countdownTime={countdownTime}
-          setCountdownTime={setCountdownTime}
           waitTime={waitTime}
-          recordTime={recordTime}
-          setRecordTime={setRecordTime}
           setWaitTime={setWaitTime}
-          questionsRawString={questionsRawString}
           inputKey={inputKey}
           sessionKey={sessionKey}
           GetSession={GetSession}

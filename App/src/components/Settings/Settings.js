@@ -7,15 +7,9 @@ import NewQuestion from "../NewQuestion/NewQuestion";
 import CloseButton from "../CloseButton/CloseButton";
 
 const Settings = ({
-  setQuestionsRawString,
   setSettingsOpen,
-  countdownTime,
-  setCountdownTime,
   waitTime,
-  recordTime,
-  setRecordTime,
   setWaitTime,
-  questionsRawString,
   inputKey,
   sessionKey,
   GetSession,
@@ -57,23 +51,28 @@ const Settings = ({
       <div className="form">
         <h3>Konfigurasjon</h3>
         <div>
-          <span>Ventetid etter opptak:</span>
-          <input
-            type="number"
-            value={waitTime / 1000}
-            min={1}
-            max={600}
-            onChange={(e) => {
-              let value = parseInt(e.target.value, 10) * 1000;
-              setWaitTime(value);
-              localStorage.setItem("waitTime", value);
-            }}
-          />
+          <span>Ventetid mellom opptak:</span>
+          <span>
+            <input
+              type="number"
+              value={waitTime / 1000}
+              min={1}
+              max={600}
+              onChange={(e) => {
+                let value = parseInt(e.target.value, 10) * 1000;
+                setWaitTime(value);
+                localStorage.setItem("waitTime", value);
+              }}
+            />
+            <span> sekunder</span>
+          </span>
         </div>
-
-        <span>Spørsmål </span>
-        <button onClick={() => setShowModal(true)}>Add New Question</button>
-
+        <div>
+          <span>Spørsmål </span>
+          <button onClick={() => setShowModal(true)}>
+            Legg til nytt spørsmål
+          </button>
+        </div>
         {showModal && (
           <NewQuestion
             closeModal={() => setShowModal(false)}
@@ -210,6 +209,7 @@ const Settings = ({
               <span>Vitneboks-ID:</span>
               <input type="text" value={sessionKey} disabled={true} />
             </div>
+
             <div>
               <span>Delelink:</span>
               <input
@@ -224,6 +224,34 @@ const Settings = ({
                 Slett vitneboks
               </button>
             </div>
+            <button
+              onClick={() => {
+                if (document.fullscreenElement) {
+                  if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                  } else if (document.webkitExitFullscreen) {
+                    /* Safari */
+                    document.webkitExitFullscreen();
+                  } else if (document.msExitFullscreen) {
+                    /* IE11 */
+                    document.msExitFullscreen();
+                  }
+                } else {
+                  var elem = document.documentElement;
+                  if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                  } else if (elem.webkitRequestFullscreen) {
+                    /* Safari */
+                    elem.webkitRequestFullscreen();
+                  } else if (elem.msRequestFullscreen) {
+                    /* IE11 */
+                    elem.msRequestFullscreen();
+                  }
+                }
+              }}
+            >
+              Fullskjerm
+            </button>
           </React.Fragment>
         )}
       </div>
