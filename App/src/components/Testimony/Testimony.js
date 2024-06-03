@@ -50,7 +50,7 @@ const Testimony = () => {
       var {
         sharingKey: newSharedKey,
         sessionKey: newSessionKey,
-        testemonials,
+        testimonials,
         actionshots,
         lastUpload,
         concatCompleted,
@@ -59,7 +59,8 @@ const Testimony = () => {
         setSessionKey(newSessionKey);
         setLastUpload(lastUpload);
         setActionShotCount(actionshots);
-        setTestimonialCount(testemonials);
+        setTestimonialCount(testimonials);
+        console.log(testimonials);
         setSharedKey(newSharedKey);
         setConcatCompleted(concatCompleted);
         localStorage.setItem("sessionKey", newSessionKey);
