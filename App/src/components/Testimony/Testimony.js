@@ -114,7 +114,6 @@ const Testimony = () => {
       let countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
       }, 1000);
-      console.log(currentQuestion.q);
       setQuestion(currentQuestion.q);
       setTimeout(async () => {
         clearInterval(countdownInterval);
@@ -177,7 +176,6 @@ const Testimony = () => {
         recorder.start();
 
         setRecording(true);
-        console.log(currentQuestion);
         setCountdown(currentQuestion.recordTime / 1000);
 
         countdownInterval = setInterval(() => {
