@@ -2,37 +2,20 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   deleteSession,
   getOrCreateSession,
-  uploadTestemony,
+  uploadTestimony,
 } from "../../Services/vitneboksService";
-import "./testemony.css";
+import "./Testimony.css";
 import Settings from "../Settings/Settings";
 import {
   GetRecordingConstrains,
   downloadFile,
   getSrtFile,
   prepFile,
+  defaultQuestions,
 } from "../../utilities";
 import Footer from "../Footer/Footer";
 
-const defaultQuestions = [
-  "Hvordan føler du deg i dag etter dagens hendelser?",
-  "Hvem stoler du mest på i huset/feriestedet, og hvorfor?",
-  "Hva synes du om de siste konfliktene eller diskusjonene som har oppstått?",
-  "Hvordan håndterte du dagens utfordringer eller oppgaver?",
-  "Er det noen spesiell person du føler deg nærmere nå sammenlignet med tidligere?",
-  "Hvem i gruppen tror du er den største konkurrenten din, og hvorfor?",
-  "Har du noen strategier for å komme lenger i konkurransen/få en partner?",
-  "Hvordan har opplevelsen så langt påvirket dine personlige relasjoner og vennskap i gruppen?",
-  "Hva er din største frykt eller bekymring for tiden?",
-  "Hvem synes du har endret seg mest siden starten av programmet, og hvorfor?",
-  "Hva savner du mest fra livet utenfor realityprogrammet?",
-  "Hvordan takler du følelsen av isolasjon eller mangel på personvern?",
-  "Er det noen personlige mål eller opplevelser du ønsker å oppnå mens du er her?",
-  "Hvordan påvirker konkurransen din oppfatning av andre deltakere?",
-  "Hvordan tror du du vil se tilbake på denne opplevelsen når den er over?",
-];
-
-const Testemony = () => {
+const Testimony = () => {
   const [videoStream, setVideoStream] = useState(null);
   const [recording, setRecording] = useState(false);
   const [question, setQuestion] = useState(null);
@@ -44,6 +27,7 @@ const Testemony = () => {
   const [sessionKey, setSessionKey] = useState(
     localStorage.getItem("sessionKey", null)
   );
+  console.log(questions);
   const [sharedKey, setSharedKey] = useState(null);
   const [inputKey, setInputKey] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -53,7 +37,9 @@ const Testemony = () => {
   const [lastUpload, setLastUpload] = useState(null);
   const [testimonialCount, setTestimonialCount] = useState(null);
   const [actionShotCount, setActionShotCount] = useState(null);
-
+  const [sessionName, setSessionName] = useState(
+    localStorage.getItem("sessionName", "")
+  );
   const [concatCompleted, setConcatCompleted] = useState(false);
   const [concatProcessStarted, setConcatProcessStarted] = useState(false);
   const [sessionWaiting, setSessionWaiting] = useState(false);
@@ -94,6 +80,9 @@ const Testemony = () => {
   useEffect(() => {
     document.addEventListener("keypress", handleKeyPress);
     setSettingsOpen(true);
+    return () => {
+      document.removeEventListener("keypress", handleKeyPress);
+    };
   }, []);
 
   useEffect(() => {
@@ -133,9 +122,8 @@ const Testemony = () => {
       let countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
       }, 1000);
-
       let currentQuestion =
-        questions[(questions.indexOf(question) || 0) + 1] || questions[0];
+        questions[(questions.q.indexOf(question) || 0) + 1] || questions.q[0];
       setQuestion(currentQuestion);
       setTimeout(async () => {
         clearInterval(countdownInterval);
@@ -172,7 +160,7 @@ const Testemony = () => {
             downloadFile(srtBlob, videoFileName.replace("mp4", "srt"));
           } else {
             // upload video
-            await uploadTestemony(
+            await uploadTestimony(
               sessionKey,
               videoBlob,
               videoFileName,
@@ -429,4 +417,4 @@ const Testemony = () => {
   );
 };
 
-export default Testemony;
+export default Testimony;

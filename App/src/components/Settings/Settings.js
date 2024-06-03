@@ -2,10 +2,12 @@ import "./Settings.css";
 
 import React, { useState } from "react";
 import { generateConcatenatedVideo } from "../../Services/vitneboksService";
+import { defaultQuestions } from "../../utilities";
+import NewQuestion from "../NewQuestion/NewQuestion";
+import CloseButton from "../CloseButton/CloseButton";
 
 const Settings = ({
   setQuestionsRawString,
-  defaultQuestions,
   setSettingsOpen,
   countdownTime,
   setCountdownTime,
@@ -41,69 +43,19 @@ const Settings = ({
     link.click();
     document.body.removeChild(link);
   };
-  const handleTextareaChange = (event) => {
-    const inputString = event.target.value;
-    const newArray = parseNewlineSeparatedList(inputString);
-    if (newArray.length > 0) {
-      setQuestions(newArray);
-    } else {
-      setQuestions(defaultQuestions);
-    }
 
-    localStorage.setItem("questions", JSON.stringify(newArray));
-    setQuestionsRawString(inputString);
-    localStorage.setItem("questionsRawString", JSON.stringify(inputString));
-  };
-
-  const parseNewlineSeparatedList = (inputString) => {
-    const arrayOfStrings = inputString.split("\n");
-    const trimmedArray = arrayOfStrings
-      ?.map((str) => str.trim())
-      .filter((str) => str !== "");
-    return trimmedArray;
-  };
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <aside className="settings">
-      <button
-        className="toggle-settings__button"
-        aria-label="Vis bruksanvisning"
+      <CloseButton
         onClick={() => {
           setSettingsOpen(false);
         }}
-      >
-        X
-      </button>
+        ariaLabel={"Vis bruksanvisning"}
+      />
       <div className="form">
         <h3>Konfigurasjon</h3>
-        <div>
-          <span>Ventetid før opptak:</span>
-          <input
-            min={1}
-            max={60}
-            type="number"
-            value={countdownTime / 1000}
-            onChange={(e) => {
-              let value = parseInt(e.target.value, 10) * 1000;
-              setCountdownTime(value);
-              localStorage.setItem("countdownTime", value);
-            }}
-          />
-        </div>
-        <div>
-          <span>Opptakstid:</span>
-          <input
-            type="number"
-            value={recordTime / 1000}
-            max={30}
-            min={5}
-            onChange={(e) => {
-              let value = parseInt(e.target.value, 10) * 1000;
-              setRecordTime(value);
-              localStorage.setItem("recordTime", value);
-            }}
-          />
-        </div>
         <div>
           <span>Ventetid etter opptak:</span>
           <input
@@ -119,17 +71,21 @@ const Settings = ({
           />
         </div>
 
-        <span>Spørsmål (ett per linje)</span>
-        <textarea
-          onChange={handleTextareaChange}
-          value={questionsRawString ?? ""}
-          style={{
-            width: "100%",
-            minHeight: "5rem",
-            color: "black",
-            textAlign: "left",
-          }}
-        />
+        <span>Spørsmål </span>
+        <button onClick={() => setShowModal(true)}>Add New Question</button>
+
+        {showModal && (
+          <NewQuestion
+            closeModal={() => setShowModal(false)}
+            saveQuestion={({ q, countdownTime, recordingTime }) => {
+              setQuestions((prevQuestions) => [
+                ...prevQuestions,
+                { q, countdownTime, recordingTime },
+              ]);
+            }}
+          />
+        )}
+
         {sessionKey == null ? (
           <React.Fragment>
             <div>

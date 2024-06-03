@@ -14,7 +14,6 @@ export async function getOrCreateSession(existingSessionKey) {
   // Generate a new GUID
   // Append the sessionKey to the URL as a query parameter
   const urlWithQueryParam = `${process.env.REACT_APP_API}get-session?sessionKey=${sessionKey}`;
-
   try {
     // Make the GET request using fetch
     const response = await fetch(urlWithQueryParam, { method: "GET" });
@@ -55,14 +54,14 @@ export async function getSharedSession(sharedKey) {
   return false;
 }
 
-export async function uploadTestemony(
+export async function uploadTestimony(
   sessionKey,
   videofile,
   videoName,
   subfile,
   subName
 ) {
-  const urlWithQueryParam = `${process.env.REACT_APP_API}upload-testemony?sessionKey=${sessionKey}`;
+  const urlWithQueryParam = `${process.env.REACT_APP_API}upload-Testimony?sessionKey=${sessionKey}`;
   const formData = new FormData();
   formData.append("video", videofile, videoName);
   formData.append("sub", subfile, subName);

@@ -41,3 +41,21 @@ export const downloadFile = (blob, fileName) => {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 };
+
+export const defaultQuestions = [
+  "Hvordan føler du deg i dag etter dagens hendelser?",
+  "Hvem stoler du mest på i huset/feriestedet, og hvorfor?",
+  "Hva synes du om de siste konfliktene eller diskusjonene som har oppstått?",
+  "Hvordan håndterte du dagens utfordringer eller oppgaver?",
+  "Er det noen spesiell person du føler deg nærmere nå sammenlignet med tidligere?",
+  "Hvem i gruppen tror du er den største konkurrenten din, og hvorfor?",
+  "Har du noen strategier for å komme lenger i konkurransen/få en partner?",
+  "Hvordan har opplevelsen så langt påvirket dine personlige relasjoner og vennskap i gruppen?",
+  "Hva er din største frykt eller bekymring for tiden?",
+  "Hvem synes du har endret seg mest siden starten av programmet, og hvorfor?",
+  "Hva savner du mest fra livet utenfor realityprogrammet?",
+  "Hvordan takler du følelsen av isolasjon eller mangel på personvern?",
+  "Er det noen personlige mål eller opplevelser du ønsker å oppnå mens du er her?",
+  "Hvordan påvirker konkurransen din oppfatning av andre deltakere?",
+  "Hvordan tror du du vil se tilbake på denne opplevelsen når den er over?",
+];
