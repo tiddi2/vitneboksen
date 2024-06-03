@@ -42,7 +42,7 @@ const NewQuestion = ({
             onClick={() => setCountdownTime(3000)}
             className={countdownTime === 3000 ? "active" : ""}
           >
-            Short
+            Kort
           </button>
           <button
             id="countdownTime-medium"
@@ -56,7 +56,7 @@ const NewQuestion = ({
             onClick={() => setCountdownTime(7000)}
             className={countdownTime === 7000 ? "active" : ""}
           >
-            Long
+            Lang
           </button>
         </div>
 
@@ -67,7 +67,7 @@ const NewQuestion = ({
             onClick={() => setrecordTime(7000)}
             className={recordTime === 7000 ? "active" : ""}
           >
-            Short
+            Kort
           </button>
           <button
             id="recordTime-medium"
@@ -81,7 +81,7 @@ const NewQuestion = ({
             onClick={() => setrecordTime(30000)}
             className={recordTime === 30000 ? "active" : ""}
           >
-            Long
+            Lang
           </button>
         </div>
 
