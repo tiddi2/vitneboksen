@@ -1,6 +1,6 @@
 .settings .form > div {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 5fr 7fr;
   text-align: left;
   margin-bottom: 0.5rem;
   width: 100%;
@@ -29,4 +29,15 @@
   box-shadow: 1px 1px 4px black;
   padding: 1rem;
   z-index: 2;
+  min-height: 40rem;
+  max-height: 80vh;
+  overflow-y: scroll;
+}
+
+.settings .settings-button-group {
+  display: flex;
+  justify-content: space-between;
+}
+.settings .settings-button-group > button {
+  padding: 0.8em;
 }

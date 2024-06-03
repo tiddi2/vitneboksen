@@ -23,6 +23,7 @@ const Testimony = () => {
   const [countdown, setCountdown] = useState();
   const [started, setStarted] = useState(false);
   const [waiting, setWaiting] = useState(false);
+  const [recorder, setRecorder] = useState(null);
   const [sessionKey, setSessionKey] = useState(
     localStorage.getItem("sessionKey", null)
   );
@@ -33,9 +34,7 @@ const Testimony = () => {
   const [lastUpload, setLastUpload] = useState(null);
   const [testimonialCount, setTestimonialCount] = useState(null);
   const [actionShotCount, setActionShotCount] = useState(null);
-  const [sessionName, setSessionName] = useState(
-    localStorage.getItem("sessionName", "")
-  );
+
   const [concatCompleted, setConcatCompleted] = useState(false);
   const [concatProcessStarted, setConcatProcessStarted] = useState(false);
   const [sessionWaiting, setSessionWaiting] = useState(false);
@@ -108,7 +107,9 @@ const Testimony = () => {
   const startRecording = async () => {
     setStarted(true);
     let currentQuestion =
-      questions[(questions.indexOf(question) || 0) + 1] || questions[0];
+      questions[
+        (questions.findIndex((item) => item.q === question) || 0) + 1
+      ] || questions[0];
     setCountdown(currentQuestion.countdownTime / 1000);
     try {
       let countdownInterval = setInterval(() => {
@@ -124,40 +125,12 @@ const Testimony = () => {
         setVideoStream(stream);
 
         const recorder = new MediaRecorder(stream);
-
+        setRecorder(recorder);
         const recordedChunks = [];
 
         recorder.ondataavailable = (event) => {
           if (event.data.size > 0) {
             recordedChunks.push(event.data);
-          }
-        };
-
-        recorder.onstop = async () => {
-          const { blob: videoBlob, fileName: videoFileName } = prepFile(
-            recordedChunks,
-            "mp4"
-          );
-
-          const { blob: srtBlob } = getSrtFile(
-            currentQuestion.recordTime / 1000,
-            currentQuestion
-          );
-
-          // Save video
-          if (!sessionKey) {
-            downloadFile(videoBlob, videoFileName);
-            downloadFile(srtBlob, videoFileName.replace("mp4", "srt"));
-          } else {
-            // upload video
-            await uploadTestimony(
-              sessionKey,
-              videoBlob,
-              videoFileName,
-              srtBlob,
-              videoFileName.replace("mp4", "srt")
-            );
-            await GetSession(sessionKey);
           }
         };
 
@@ -179,10 +152,42 @@ const Testimony = () => {
         setCountdown(currentQuestion.recordTime / 1000);
 
         countdownInterval = setInterval(() => {
+          if (recorder.state === "inactive") {
+            clearInterval(countdownInterval);
+            return;
+          }
           setCountdown((prevCountdown) => prevCountdown - 1);
         }, 1000);
+        recorder.onstop = async () => {
+          const { blob: videoBlob, fileName: videoFileName } = prepFile(
+            recordedChunks,
+            "mp4"
+          );
+
+          const { blob: srtBlob } = getSrtFile(
+            currentQuestion.recordTime / 1000,
+            currentQuestion.q
+          );
+
+          // Save video
+          if (!sessionKey) {
+            downloadFile(videoBlob, videoFileName);
+            downloadFile(srtBlob, videoFileName.replace("mp4", "srt"));
+          } else {
+            // upload video
+            await uploadTestimony(
+              sessionKey,
+              videoBlob,
+              videoFileName,
+              srtBlob,
+              videoFileName.replace("mp4", "srt")
+            );
+            await GetSession(sessionKey);
+          }
+        };
 
         setTimeout(async () => {
+          if (recorder.state === "inactive") return;
           clearInterval(countdownInterval);
           recorder.stop();
           setRecording(false);
@@ -231,7 +236,15 @@ const Testimony = () => {
 
   return (
     <div>
-      <h1 style={{ margin: "1rem", textAlign: "center" }}>
+      <h1
+        style={{
+          margin: "1rem",
+          marginTop: "3rem",
+          textAlign: "center",
+          fontSize: recording ? null : "3em",
+          transition: "all 3s ease",
+        }}
+      >
         {started && !waiting && question}
       </h1>
       <div
@@ -297,6 +310,32 @@ const Testimony = () => {
           }}
           autoPlay
         />
+        {recording && (
+          <button
+            onClick={() => {
+              const videoElement = document.getElementById("video");
+              recorder.stop();
+              setRecording(false);
+              setWaiting(true);
+              videoElement.srcObject = null;
+              videoElement.src = null;
+              setCountdown(waitTime / 1000);
+              setConcatProcessStarted(false);
+              localStorage.setItem("concatProcessStarted", false);
+              let manualCountdownInterval = setInterval(() => {
+                setCountdown((prevCountdown) => prevCountdown - 1);
+              }, 1000);
+
+              setTimeout(async () => {
+                clearInterval(manualCountdownInterval);
+                setWaiting(false);
+                setStarted(false);
+              }, waitTime); //wait
+            }}
+          >
+            Ferdig snakka
+          </button>
+        )}
       </div>
 
       <div
@@ -393,7 +432,15 @@ const Testimony = () => {
           concatCompleted={concatCompleted}
           sharedKey={sharedKey}
           deleteSessionClick={deleteSessionClick}
-          setQuestions={setQuestions}
+          setQuestions={(setter) => {
+            localStorage.setItem(
+              "questions",
+              JSON.stringify(setter(questions))
+            );
+
+            setQuestions(setter(questions));
+          }}
+          questions={questions}
         />
       )}
       <Footer />

@@ -2,7 +2,6 @@ import "./Settings.css";
 
 import React, { useState } from "react";
 import { generateConcatenatedVideo } from "../../Services/vitneboksService";
-import { defaultQuestions } from "../../utilities";
 import NewQuestion from "../NewQuestion/NewQuestion";
 import CloseButton from "../CloseButton/CloseButton";
 
@@ -25,10 +24,13 @@ const Settings = ({
   sharedKey,
   deleteSessionClick,
   setQuestions,
+  questions,
 }) => {
   const [sessionName, setSessionName] = useState(
     localStorage.getItem("sessionName", "")
   );
+  const [isEditingQuestion, setIsEditingQuestion] = useState(false);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
 
   const handleDownload = (url) => {
     const link = document.createElement("a");
@@ -73,13 +75,94 @@ const Settings = ({
             Legg til nytt spørsmål
           </button>
         </div>
+
+        {questions &&
+          questions.map((question, index) => {
+            return (
+              <div key={index}>
+                <span>{question.q}</span>
+                <span className="settings-button-group">
+                  <button
+                    onClick={() => {
+                      setIsEditingQuestion(true);
+                      setEditingQuestionIndex(index);
+                    }}
+                  >
+                    Endre
+                  </button>
+                  <button
+                    onClick={() => {
+                      setQuestions((prevQuestions) => [
+                        ...prevQuestions.slice(0, index),
+                        ...prevQuestions.slice(index + 1),
+                      ]);
+                    }}
+                  >
+                    Slett
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (index === 0) return;
+                      setQuestions((prevQuestions) => [
+                        ...prevQuestions.slice(0, index - 1),
+                        prevQuestions[index],
+                        prevQuestions[index - 1],
+                        ...prevQuestions.slice(index + 1),
+                      ]);
+                    }}
+                  >
+                    ^
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (index === questions.length - 1) return;
+                      setQuestions((prevQuestions) => [
+                        ...prevQuestions.slice(0, index),
+                        prevQuestions[index + 1],
+                        prevQuestions[index],
+                        ...prevQuestions.slice(index + 2),
+                      ]);
+                    }}
+                  >
+                    v
+                  </button>
+                </span>
+              </div>
+            );
+          })}
+
+        {isEditingQuestion && (
+          <NewQuestion
+            closeModal={() => {
+              setShowModal(false);
+              setIsEditingQuestion(false);
+              setEditingQuestionIndex(null);
+            }}
+            saveQuestion={({ q, countdownTime, recordTime }) => {
+              setQuestions((prevQuestions) => {
+                const updatedQuestions = [...prevQuestions];
+                updatedQuestions[editingQuestionIndex] = {
+                  q,
+                  countdownTime,
+                  recordTime,
+                };
+                return updatedQuestions;
+              });
+              setIsEditingQuestion(false);
+              setEditingQuestionIndex(null);
+            }}
+            defaultQuestion={questions[editingQuestionIndex].q.trim()}
+            defaultCountDownTime={questions[editingQuestionIndex].countdownTime}
+            defaultRecordTime={questions[editingQuestionIndex].recordTime}
+          />
+        )}
         {showModal && (
           <NewQuestion
             closeModal={() => setShowModal(false)}
-            saveQuestion={({ q, countdownTime, recordingTime }) => {
+            saveQuestion={({ q, countdownTime, recordTime }) => {
               setQuestions((prevQuestions) => [
                 ...prevQuestions,
-                { q, countdownTime, recordingTime },
+                { q, countdownTime, recordTime },
               ]);
             }}
           />

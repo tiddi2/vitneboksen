@@ -29,6 +29,9 @@
 
 .input-field {
   margin: 10px 0;
+  height: 40px;
+  width: 100%;
+  font-size: 1.25rem;
 }
 
 .button-group {
