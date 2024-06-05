@@ -60,7 +60,6 @@ const Testimony = () => {
         setLastUpload(lastUpload);
         setActionShotCount(actionshots);
         setTestimonialCount(testimonials);
-        console.log(testimonials);
         setSharedKey(newSharedKey);
         setConcatCompleted(concatCompleted);
         localStorage.setItem("sessionKey", newSessionKey);
