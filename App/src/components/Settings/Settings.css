@@ -1,0 +1,43 @@
+.settings .form > div {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  text-align: left;
+  margin-bottom: 0.5rem;
+  width: 100%;
+  align-items: center;
+}
+.settings .form {
+  max-width: 40rem;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: space-evenly;
+}
+
+.settings {
+  position: fixed;
+  top: 2rem;
+  right: 0;
+  left: 0;
+  margin: auto;
+  max-width: 42rem;
+  width: 50vw;
+  min-width: 20rem;
+  min-height: 40rem;
+  background: rgba(14, 26, 64, 0.98);
+  box-shadow: 1px 1px 4px black;
+  padding: 1rem;
+  z-index: 2;
+  min-height: 40rem;
+  max-height: 80vh;
+  overflow-y: scroll;
+}
+
+.settings .settings-button-group {
+  display: flex;
+  justify-content: space-between;
+}
+.settings .settings-button-group > button {
+  padding: 0.8em;
+}

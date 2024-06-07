@@ -1,0 +1,13 @@
+input[type="number"] {
+  color: black;
+  width: 3rem;
+  text-align: left;
+}
+input[type="text"] {
+  color: black;
+  text-align: left;
+}
+
+input[type="text"]:disabled {
+  background: white;
+}

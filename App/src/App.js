@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import queryString from "query-string";
-import Testemony from "./components/Testemony/testemony";
+import Testimony from "./components/Testimony/Testimony";
 import "./App.css";
 import ActionShot from "./components/ActionShot/actionShot";
 import ismobile from "is-mobile";
+import CloseButton from "./components/CloseButton/CloseButton";
 const App = () => {
   const [sharedKey, setSharedKey] = useState(null);
   //const [hasCamera, setHasCamera] = useState(true);
@@ -47,31 +48,13 @@ const App = () => {
   return (
     <main>
       {closeTutorial && (
-        <button
-          style={{
-            boxSizing: "content-box",
-            display: "block",
-            height: "2rem",
-            width: "2rem",
-            lineHeight: "1rem",
-            borderRadius: "100%",
-            background: "none",
-            color: "white",
-            border: "1px solid white",
-            textAlign: "center",
-            cursor: "pointer",
-            padding: ".1rem",
-            fontSize: "1rem",
-            margin: "0.5rem",
-            opacity: "0.5",
-          }}
-          aria-label="Vis bruksanvisning"
+        <CloseButton
           onClick={() => {
             setCloseTutorial((prev) => !prev);
           }}
-        >
-          ?
-        </button>
+          label={"?"}
+          ariaLabel={"Vis bruksanvisning"}
+        />
       )}
       {sharedKey !== null && sharedKey && <ActionShot />}
       {sharedKey !== null && sharedKey === false && !closeTutorial && (
@@ -185,7 +168,7 @@ const App = () => {
         sharedKey === false &&
         closeTutorial &&
         (true ? (
-          <Testemony />
+          <Testimony />
         ) : (
           <h1>
             Enten så har du ikke kamera eller så har du deaktivert det. 😤

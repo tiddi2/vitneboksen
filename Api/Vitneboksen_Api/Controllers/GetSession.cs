@@ -22,13 +22,13 @@ public static class GetSession
         }
 
         var blobs = containerClient.GetBlobs();
-        var testemonials = blobs.Count(b => b.Name.Contains("testemonial.mp4"));
+        var testimonials = blobs.Count(b => b.Name.Contains("testimonial.mp4"));
         var actionshots = blobs.Count(b => b.Name.Contains("actionshot.mp4"));
 
         var latestUploadTime = blobs.Where(b => b.Name != Constants.ConcatinatedVideoFileName).MaxBy(b => b.Properties.CreatedOn)?.Properties.CreatedOn;
-        return Results.Ok(new SessionStatus(sessionKey, sharingKey, testemonials, actionshots, blobs.Any(b => b.Name == Constants.ConcatinatedVideoFileName), latestUploadTime));
+        return Results.Ok(new SessionStatus(sessionKey, sharingKey, testimonials, actionshots, blobs.Any(b => b.Name == Constants.ConcatinatedVideoFileName), latestUploadTime));
     }
 }
 
-public record SessionStatus(string SessionKey, string SharingKey, int Testemonials, int Actionshots, bool ConcatCompleted, DateTimeOffset? LastUpload);
+public record SessionStatus(string SessionKey, string SharingKey, int Testimonials, int Actionshots, bool ConcatCompleted, DateTimeOffset? LastUpload);
 
