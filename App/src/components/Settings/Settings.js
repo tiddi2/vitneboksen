@@ -25,10 +25,9 @@ const Settings = ({
   deleteSessionClick,
   setQuestions,
   questions,
+  sessionName,
+  setSessionName,
 }) => {
-  const [sessionName, setSessionName] = useState(
-    localStorage.getItem("sessionName", "")
-  );
   const [isEditingQuestion, setIsEditingQuestion] = useState(false);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
 
@@ -50,37 +49,69 @@ const Settings = ({
         }}
         ariaLabel={"Vis bruksanvisning"}
       />
+      <button
+        onClick={() => {
+          if (document.fullscreenElement) {
+            if (document.exitFullscreen) {
+              document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+              /* Safari */
+              document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+              /* IE11 */
+              document.msExitFullscreen();
+            }
+          } else {
+            var elem = document.documentElement;
+            if (elem.requestFullscreen) {
+              elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+              /* Safari */
+              elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+              /* IE11 */
+              elem.msRequestFullscreen();
+            }
+          }
+        }}
+      >
+        Fullskjerm
+      </button>
       <div className="form">
         <h3>Konfigurasjon</h3>
-        <div>
-          <span>Ventetid mellom opptak:</span>
-          <span>
-            <input
-              type="number"
-              value={waitTime / 1000}
-              min={1}
-              max={600}
-              onChange={(e) => {
-                let value = parseInt(e.target.value, 10) * 1000;
-                setWaitTime(value);
-                localStorage.setItem("waitTime", value);
-              }}
-            />
-            <span> sekunder</span>
-          </span>
-        </div>
-        <div>
-          <span>Spørsmål </span>
-          <button onClick={() => setShowModal(true)}>
-            Legg til nytt spørsmål
-          </button>
-        </div>
-
-        {questions &&
+        {sessionKey && (
+          <div>
+            <div>
+              <span>Ventetid mellom opptak:</span>
+              <span>
+                <input
+                  type="number"
+                  value={waitTime / 1000}
+                  min={1}
+                  max={600}
+                  onChange={(e) => {
+                    let value = parseInt(e.target.value, 10) * 1000;
+                    setWaitTime(value);
+                    localStorage.setItem("waitTime", value);
+                  }}
+                />
+                <span> sekunder</span>
+              </span>
+            </div>
+            <div>
+              <span>Spørsmål </span>
+              <button onClick={() => setShowModal(true)}>
+                Legg til nytt spørsmål
+              </button>
+            </div>
+          </div>
+        )}
+        {sessionKey &&
+          questions &&
           questions.map((question, index) => {
             return (
               <div key={index}>
-                <span>{question.q}</span>
+                <span>{question.text}</span>
                 <span className="settings-button-group">
                   <button
                     onClick={() => {
@@ -138,11 +169,11 @@ const Settings = ({
               setIsEditingQuestion(false);
               setEditingQuestionIndex(null);
             }}
-            saveQuestion={({ q, countdownTime, recordTime }) => {
+            saveQuestion={({ text, countdownTime, recordTime }) => {
               setQuestions((prevQuestions) => {
                 const updatedQuestions = [...prevQuestions];
                 updatedQuestions[editingQuestionIndex] = {
-                  q,
+                  text,
                   countdownTime,
                   recordTime,
                 };
@@ -151,7 +182,7 @@ const Settings = ({
               setIsEditingQuestion(false);
               setEditingQuestionIndex(null);
             }}
-            defaultQuestion={questions[editingQuestionIndex].q.trim()}
+            defaultQuestion={questions[editingQuestionIndex].text.trim()}
             defaultCountDownTime={questions[editingQuestionIndex].countdownTime}
             defaultRecordTime={questions[editingQuestionIndex].recordTime}
           />
@@ -159,10 +190,10 @@ const Settings = ({
         {showModal && (
           <NewQuestion
             closeModal={() => setShowModal(false)}
-            saveQuestion={({ q, countdownTime, recordTime }) => {
+            saveQuestion={({ text, countdownTime, recordTime }) => {
               setQuestions((prevQuestions) => [
                 ...prevQuestions,
-                { q, countdownTime, recordTime },
+                { text, countdownTime, recordTime },
               ]);
             }}
           />
@@ -210,10 +241,7 @@ const Settings = ({
               <input
                 type="test"
                 value={sessionName}
-                onChange={(e) => {
-                  setSessionName(e.target.value);
-                  localStorage.setItem("sessionName", e.target.value);
-                }}
+                onChange={(e) => setSessionName(e.target.value)}
               />
             </div>
             <div>
@@ -307,34 +335,6 @@ const Settings = ({
                 Slett vitneboks
               </button>
             </div>
-            <button
-              onClick={() => {
-                if (document.fullscreenElement) {
-                  if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                  } else if (document.webkitExitFullscreen) {
-                    /* Safari */
-                    document.webkitExitFullscreen();
-                  } else if (document.msExitFullscreen) {
-                    /* IE11 */
-                    document.msExitFullscreen();
-                  }
-                } else {
-                  var elem = document.documentElement;
-                  if (elem.requestFullscreen) {
-                    elem.requestFullscreen();
-                  } else if (elem.webkitRequestFullscreen) {
-                    /* Safari */
-                    elem.webkitRequestFullscreen();
-                  } else if (elem.msRequestFullscreen) {
-                    /* IE11 */
-                    elem.msRequestFullscreen();
-                  }
-                }
-              }}
-            >
-              Fullskjerm
-            </button>
           </React.Fragment>
         )}
       </div>

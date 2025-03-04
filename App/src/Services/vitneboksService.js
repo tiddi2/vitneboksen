@@ -6,30 +6,20 @@ function generateKey() {
   });
 }
 
-// Function to make the GET request
 export async function getOrCreateSession(existingSessionKey) {
-  // URL for the API endpoint
   const sessionKey = existingSessionKey || generateKey();
 
-  // Generate a new GUID
-  // Append the sessionKey to the URL as a query parameter
   const urlWithQueryParam = `${process.env.REACT_APP_API}get-session?sessionKey=${sessionKey}`;
   try {
-    // Make the GET request using fetch
     const response = await fetch(urlWithQueryParam, { method: "GET" });
 
-    // Check if the request was successful
     if (!response.ok) {
       console.log(response.error);
-      throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    // Parse and return the response data
     const body = await response.json();
     return body;
   } catch (error) {
-    // Handle errors here
     console.error("Error:", error);
-    throw error; // Rethrow the error for the component to handle
   }
 }
 
@@ -61,7 +51,7 @@ export async function uploadTestimony(
   subfile,
   subName
 ) {
-  const urlWithQueryParam = `${process.env.REACT_APP_API}upload-testemony?sessionKey=${sessionKey}`;
+  const urlWithQueryParam = `${process.env.REACT_APP_API}upload-testimony?sessionKey=${sessionKey}`;
   const formData = new FormData();
   formData.append("video", videofile, videoName);
   formData.append("sub", subfile, subName);
@@ -86,6 +76,34 @@ export async function deleteSession(sessionKey) {
     console.log(error);
   }
   return true;
+}
+
+export async function updateSessionName(sessionKey, name) {
+  const urlWithQueryParam = `${process.env.REACT_APP_API}set-name?sessionKey=${sessionKey}&name=${name}`;
+  const response = await fetch(urlWithQueryParam, {
+    method: "GET",
+  });
+
+  if (response.ok) {
+    return true;
+  }
+  return false;
+}
+
+export async function updateQuestions(sessionKey, questions) {
+  const urlWithQueryParam = `${process.env.REACT_APP_API}set-questions?sessionKey=${sessionKey}`;
+  const response = await fetch(urlWithQueryParam, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(questions),
+  });
+
+  if (response.ok) {
+    return true;
+  }
+  return false;
 }
 
 async function uploadFile(url, formData) {

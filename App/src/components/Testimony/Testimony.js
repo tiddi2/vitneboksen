@@ -3,6 +3,8 @@ import {
   deleteSession,
   getOrCreateSession,
   uploadTestimony,
+  updateQuestions,
+  updateSessionName,
 } from "../../Services/vitneboksService";
 import "./Testimony.css";
 import Settings from "../Settings/Settings";
@@ -11,7 +13,6 @@ import {
   downloadFile,
   getSrtFile,
   prepFile,
-  defaultQuestions,
 } from "../../utilities";
 import Footer from "../Footer/Footer";
 
@@ -27,6 +28,7 @@ const Testimony = () => {
   const [sessionKey, setSessionKey] = useState(
     localStorage.getItem("sessionKey", null)
   );
+  const [sessionName, setSessionName] = useState(null);
   const [sharedKey, setSharedKey] = useState(null);
   const [inputKey, setInputKey] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -54,6 +56,8 @@ const Testimony = () => {
         actionshots,
         lastUpload,
         concatCompleted,
+        questions,
+        sessionName,
       } = await getOrCreateSession(sessionKey);
       if (newSessionKey) {
         setSessionKey(newSessionKey);
@@ -61,6 +65,8 @@ const Testimony = () => {
         setActionShotCount(actionshots);
         setTestimonialCount(testimonials);
         setSharedKey(newSharedKey);
+        setSessionName(sessionName);
+        setQuestions(questions);
         setConcatCompleted(concatCompleted);
         localStorage.setItem("sessionKey", newSessionKey);
         localStorage.setItem("sharedKey", newSharedKey);
@@ -81,14 +87,6 @@ const Testimony = () => {
   }, []);
 
   useEffect(() => {
-    const customQuestions = JSON.parse(localStorage.getItem("questions"));
-    setQuestions(
-      customQuestions === undefined ||
-        customQuestions === null ||
-        customQuestions?.length === 0
-        ? defaultQuestions
-        : customQuestions
-    );
     setWaitTime(JSON.parse(localStorage.getItem("waitTime")) || 30000);
     setConcatProcessStarted(
       JSON.parse(localStorage.getItem("concatProcessStarted")) || false
@@ -108,14 +106,14 @@ const Testimony = () => {
     setStarted(true);
     let currentQuestion =
       questions[
-        (questions.findIndex((item) => item.q === question) || 0) + 1
+        (questions.findIndex((item) => item.text === question) || 0) + 1
       ] || questions[0];
     setCountdown(currentQuestion.countdownTime / 1000);
     try {
       let countdownInterval = setInterval(() => {
         setCountdown((prevCountdown) => prevCountdown - 1);
       }, 1000);
-      setQuestion(currentQuestion.q);
+      setQuestion(currentQuestion.text);
       setTimeout(async () => {
         clearInterval(countdownInterval);
 
@@ -166,7 +164,7 @@ const Testimony = () => {
 
           const { blob: srtBlob } = getSrtFile(
             currentQuestion.recordTime / 1000,
-            currentQuestion.q
+            currentQuestion.text
           );
 
           // Save video
@@ -414,7 +412,6 @@ const Testimony = () => {
 
       {settingsOpen && (
         <Settings
-          defaultQuestions={defaultQuestions}
           setSettingsOpen={setSettingsOpen}
           waitTime={waitTime}
           setWaitTime={setWaitTime}
@@ -433,14 +430,15 @@ const Testimony = () => {
           sharedKey={sharedKey}
           deleteSessionClick={deleteSessionClick}
           setQuestions={(setter) => {
-            localStorage.setItem(
-              "questions",
-              JSON.stringify(setter(questions))
-            );
-
+            updateQuestions(sessionKey, setter(questions));
             setQuestions(setter(questions));
           }}
           questions={questions}
+          sessionName={sessionName}
+          setSessionName={(name) => {
+            updateSessionName(sessionKey, name);
+            setSessionName(name);
+          }}
         />
       )}
       <Footer />

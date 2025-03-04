@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Vitneboksen_Api.Controllers;
 
 public static class GetSession
@@ -6,10 +9,10 @@ public static class GetSession
     {
         var blobService = new Azure.Storage.Blobs.BlobServiceClient(constring);
 
-        var sessionKey = req.Query["sessionKey"];
+        var sessionKey = req.Query["sessionKey"]!;
         string sharingKey;
 
-        var containerClient = Helpers.GetContainerBySessionKey(blobService, sessionKey);
+        var containerClient = Helpers.GetContainerBySessionKey(blobService, sessionKey!);
         if (containerClient == null)
         {
             sharingKey = Guid.NewGuid().ToString().Substring(0, 8);
@@ -26,9 +29,48 @@ public static class GetSession
         var actionshots = blobs.Count(b => b.Name.Contains("actionshot.mp4"));
 
         var latestUploadTime = blobs.Where(b => b.Name != Constants.ConcatinatedVideoFileName).MaxBy(b => b.Properties.CreatedOn)?.Properties.CreatedOn;
-        return Results.Ok(new SessionStatus(sessionKey, sharingKey, testimonials, actionshots, blobs.Any(b => b.Name == Constants.ConcatinatedVideoFileName), latestUploadTime));
+
+        var blobClient = containerClient.GetBlobClient(Constants.SessionInfoFileName);
+        var session = new Session("", []);
+        if (blobClient.Exists())
+        {
+            var blob = await blobClient.DownloadContentAsync();
+            var json = blob?.Value?.Content?.ToString();
+            if (json != null)
+                session = JsonSerializer.Deserialize<Session>(json);
+        }
+
+        return Results.Ok(new SessionStatus(
+            session.SessionName,
+            sessionKey!,
+            sharingKey,
+            testimonials,
+            actionshots,
+            blobs.Any(b => b.Name == Constants.ConcatinatedVideoFileName),
+            latestUploadTime,
+            session.Questions));
     }
 }
 
-public record SessionStatus(string SessionKey, string SharingKey, int Testimonials, int Actionshots, bool ConcatCompleted, DateTimeOffset? LastUpload);
+public record SessionStatus(
+    string SessionName,
+    string SessionKey,
+    string SharingKey,
+    int Testimonials,
+    int Actionshots,
+    bool ConcatCompleted,
+    DateTimeOffset? LastUpload,
+    List<Question> Questions);
+
+public record Session(
+    string SessionName,
+    List<Question> Questions
+   );
+
+public record Question(
+    [property: JsonPropertyName("text")] string Text,
+    [property: JsonPropertyName("countdownTime")] int CountdownTime,
+    [property: JsonPropertyName("recordTime")] int RecordTime,
+    [property: JsonPropertyName("order")] int Order = 0
+    );
 

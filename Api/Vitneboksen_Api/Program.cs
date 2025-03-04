@@ -6,7 +6,9 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
                       {
-                          policy.AllowAnyOrigin().AllowAnyMethod();
+                          policy.AllowAnyOrigin()
+                                .AllowAnyMethod()
+                                .AllowAnyHeader();
                       });
 });
 
@@ -16,7 +18,7 @@ var app = builder.Build();
 app.UseCors();
 var storageConnectionString = builder.Configuration.GetSection("StorageConnectionString").Get<string>() ?? "";
 
-app.MapPost("/upload-testemony", async Task<IResult> (HttpRequest request) => await UploadTestimony.Run(request, storageConnectionString));
+app.MapPost("/upload-testimony", async Task<IResult> (HttpRequest request) => await UploadTestimony.Run(request, storageConnectionString));
 
 app.MapPost("/upload-actionshot", async Task<IResult> (HttpRequest request) => await UploadActionShot.Run(request, storageConnectionString));
 
@@ -31,5 +33,9 @@ app.MapGet("/create-concatenated-video", async Task<IResult> (HttpRequest reques
 app.MapGet("/download-concatenated-video", async Task<IResult> (HttpRequest request) => await DownloadConcatFile.Run(request, storageConnectionString));
 
 app.MapDelete("/delete-session", async Task<IResult> (HttpRequest request) => await DeleteSession.Run(request, storageConnectionString));
+
+app.MapGet("/set-name", async Task<IResult> (HttpRequest request) => await SetName.Run(request, storageConnectionString));
+
+app.MapPost("/set-questions", async Task<IResult> (HttpRequest request) => await SetQuestions.Run(request, storageConnectionString));
 
 app.Run();

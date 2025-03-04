@@ -69,7 +69,6 @@ public static class CreateConcatinatedVideo
         catch (Exception e)
         {
             return Results.Problem(e.InnerException.Message);
-            Console.WriteLine(e);
         }
         finally
         {

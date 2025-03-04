@@ -89,7 +89,7 @@ const NewQuestion = ({
           <button
             onClick={() => {
               saveQuestion({
-                q: question.trim(),
+                text: question.trim(),
                 countdownTime,
                 recordTime,
               });
