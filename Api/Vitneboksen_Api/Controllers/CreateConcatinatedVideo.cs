@@ -97,7 +97,7 @@ public static class CreateConcatinatedVideo
 
     private static async Task<Dictionary<string, string>> CreateTransitionsFromBlobs(List<BlobItem> blobs, string tempPath)
     {
-        var norwegianTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
+        var norwegianTimeZone = TimeZoneInfo.FindSystemTimeZoneById(OperatingSystem.IsWindows() ? "Central Europe Standard Time" : "Europe/Oslo");
         var transitions = new Dictionary<string, string>();
 
         var filteredElements = blobs
