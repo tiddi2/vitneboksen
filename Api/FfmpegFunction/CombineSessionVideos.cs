@@ -127,7 +127,7 @@ namespace FfmpegFunction
                 var transitionSourcePath = Path.Combine(tempPath, Constants.TransitionFileName);
                 var transitionDestinationPath = Path.Combine(tempPath, $"transition-{blob.Name}");
 
-                var ffmpegCmd = $"-i \"{transitionSourcePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}:force_style='Alignment=10'\" -c:v libx264 -c:a aac -ar 48000 \"{transitionDestinationPath}\""
+                var ffmpegCmd = $"-i \"{transitionSourcePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}:force_style='Alignment=10'\" -c:v libx264 -c:a aac -ar 48000 \"{transitionDestinationPath}\"";
 
                 await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 
