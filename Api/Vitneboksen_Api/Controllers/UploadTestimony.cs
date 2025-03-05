@@ -1,3 +1,5 @@
+using Shared;
+
 namespace Vitneboksen_Api.Controllers;
 
 public static class UploadTestimony

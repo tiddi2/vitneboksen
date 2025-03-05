@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Shared;
 
 namespace Vitneboksen_Api.Controllers;
 

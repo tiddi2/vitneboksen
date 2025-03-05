@@ -1,3 +1,4 @@
+using Shared;
 using System.IO.Compression;
 
 namespace Vitneboksen_Api;

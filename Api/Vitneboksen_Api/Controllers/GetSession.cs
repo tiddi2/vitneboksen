@@ -1,3 +1,4 @@
+using Shared;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -38,6 +39,14 @@ public static class GetSession
             var json = blob?.Value?.Content?.ToString();
             if (json != null)
                 session = JsonSerializer.Deserialize<Session>(json);
+        }
+        else
+        {
+            session = new Session(
+                string.Empty,
+                []
+                );
+            await Helpers.UploadJsonToStorage(blobClient, session);
         }
 
         return Results.Ok(new SessionStatus(

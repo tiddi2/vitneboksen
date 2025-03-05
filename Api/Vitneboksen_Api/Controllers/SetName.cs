@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Shared;
+using System.Text.Json;
 
 namespace Vitneboksen_Api.Controllers;
 
