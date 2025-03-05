@@ -1,3 +1,4 @@
+using Shared;
 using Vitneboksen_Api;
 using Vitneboksen_Api.Controllers;
 
@@ -18,9 +19,9 @@ var app = builder.Build();
 app.UseCors();
 var storageConnectionString = builder.Configuration.GetSection("StorageConnectionString").Get<string>() ?? "";
 
-app.MapPost("/upload-testimony", async Task<IResult> (HttpRequest request) => await UploadTestimony.Run(request, storageConnectionString));
+app.MapPost("/upload-testimony", async Task<IResult> (HttpRequest request) => await UploadVideo.Run(request, storageConnectionString, Constants.VideoTypes.Testimonial));
 
-app.MapPost("/upload-actionshot", async Task<IResult> (HttpRequest request) => await UploadActionShot.Run(request, storageConnectionString));
+app.MapPost("/upload-actionshot", async Task<IResult> (HttpRequest request) => await UploadVideo.Run(request, storageConnectionString, Constants.VideoTypes.ActionShot));
 
 app.MapGet("/get-session", async Task<IResult> (HttpRequest request) => await GetSession.Run(request, storageConnectionString));
 

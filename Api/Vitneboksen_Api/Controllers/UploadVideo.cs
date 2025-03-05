@@ -2,9 +2,9 @@ using Shared;
 
 namespace Vitneboksen_Api.Controllers;
 
-public static class UploadTestimonyV2
+public static class UploadVideo
 {
-    public static async Task<IResult> Run(HttpRequest req, string constring)
+    public static async Task<IResult> Run(HttpRequest req, string videoType, string constring)
     {
         var blobService = new Azure.Storage.Blobs.BlobServiceClient(constring);
         string? sessionKey = req.Query["sessionKey"];
@@ -23,7 +23,7 @@ public static class UploadTestimonyV2
             return Results.NotFound("Not found");
         }
 
-        var tempFolder = Helpers.GetUnprocessedFileName(containerClient.Name, Guid.NewGuid());
+        var tempFolder = Helpers.GetUnprocessedFileName(containerClient.Name, Guid.NewGuid(), videoType);
         var videoFileName = $"{tempFolder}.mp4";
         var subFileName = $"{tempFolder}.srt";
 

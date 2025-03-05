@@ -23,7 +23,7 @@ namespace Shared
 
         public static BlobContainerClient GetUnprocessedContainer(BlobServiceClient blobService) => blobService.GetBlobContainerClient(Constants.UnprocessedContainer);
 
-        public static string GetUnprocessedFileName(string sessionKeyPair, Guid uploadId) => $"{sessionKeyPair}|{uploadId}";
+        public static string GetUnprocessedFileName(string sessionKeyPair, Guid uploadId, string videoType) => $"{sessionKeyPair}|{uploadId}|{videoType}";
 
         public static string GetSessionKeyPairFromUnprocessedFileName(string fileName) => fileName.Split('|').First();
 
