@@ -97,6 +97,7 @@ public static class CreateConcatinatedVideo
 
     private static async Task<Dictionary<string, string>> CreateTransitionsFromBlobs(List<BlobItem> blobs, string tempPath)
     {
+        var norwegianTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
         var transitions = new Dictionary<string, string>();
 
         var filteredElements = blobs
@@ -109,7 +110,11 @@ public static class CreateConcatinatedVideo
         foreach (var blob in filteredElements)
         {
             var subFilePath = Path.Combine(tempPath, $"transition-{blob.Name}.srt");
-            var srtContent = $"1\n00:00:00,000 --> 00:00:01,250\nkl. {blob.Properties.CreatedOn!.Value.ToString("HH:mm")}\n";
+            // Get the Norwegian timezone
+
+            // Convert the DateTimeOffset to Norwegian time
+            var norwegianTime = TimeZoneInfo.ConvertTime(blob.Properties.CreatedOn!.Value, norwegianTimeZone);
+            var srtContent = $"1\n00:00:00,000 --> 00:00:01,250\nkl. {norwegianTime.ToString("HH:mm")}\n";
             File.WriteAllText(subFilePath, srtContent);
 
             var transitionSourcePath = Path.Combine(tempPath, Constants.TransitionFileName);
