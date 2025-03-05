@@ -1,6 +1,5 @@
 using Shared;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Vitneboksen_Api.Controllers;
 
@@ -60,26 +59,3 @@ public static class GetSession
             session.Questions));
     }
 }
-
-public record SessionStatus(
-    string SessionName,
-    string SessionKey,
-    string SharingKey,
-    int Testimonials,
-    int Actionshots,
-    bool ConcatCompleted,
-    DateTimeOffset? LastUpload,
-    List<Question> Questions);
-
-public record Session(
-    string SessionName,
-    List<Question> Questions
-   );
-
-public record Question(
-    [property: JsonPropertyName("text")] string Text,
-    [property: JsonPropertyName("countdownTime")] int CountdownTime,
-    [property: JsonPropertyName("recordTime")] int RecordTime,
-    [property: JsonPropertyName("order")] int Order = 0
-    );
-

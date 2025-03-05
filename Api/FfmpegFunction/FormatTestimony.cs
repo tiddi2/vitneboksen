@@ -30,15 +30,16 @@ namespace FfmpegFunction
 
             var blobService = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
             var sessionKeyPair = Helpers.GetSessionKeyPairFromUnprocessedFileName(blobName);
+            var blobNameBase = blobName.Split('.').First();
+            var videoType = blobNameBase.Split("|").Last();
+
             var sessionKey = sessionKeyPair.Split("-").First();
-            var videoType = sessionKeyPair.Split("-").Last();
 
             var unprocessedContainer = Helpers.GetUnprocessedContainer(blobService);
             if (unprocessedContainer == null)
             {
                 throw new Exception("No container found");
             }
-            var blobNameBase = blobName.Split('.').First();
 
             var subfileBlobclient = unprocessedContainer.GetBlobClient($"{blobNameBase}.srt");
             var videofileBlobClient = unprocessedContainer.GetBlobClient(blobName);

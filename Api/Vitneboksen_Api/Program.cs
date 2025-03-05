@@ -19,9 +19,9 @@ var app = builder.Build();
 app.UseCors();
 var storageConnectionString = builder.Configuration.GetSection("StorageConnectionString").Get<string>() ?? "";
 
-app.MapPost("/upload-testimony", async Task<IResult> (HttpRequest request) => await UploadVideo.Run(request, storageConnectionString, Constants.VideoTypes.Testimonial));
+app.MapPost("/upload-testimony", async Task<IResult> (HttpRequest request) => await UploadVideo.Run(request, videoType: Constants.VideoTypes.Testimonial, constring: storageConnectionString));
 
-app.MapPost("/upload-actionshot", async Task<IResult> (HttpRequest request) => await UploadVideo.Run(request, storageConnectionString, Constants.VideoTypes.ActionShot));
+app.MapPost("/upload-actionshot", async Task<IResult> (HttpRequest request) => await UploadVideo.Run(request, videoType: Constants.VideoTypes.ActionShot, constring: storageConnectionString));
 
 app.MapGet("/get-session", async Task<IResult> (HttpRequest request) => await GetSession.Run(request, storageConnectionString));
 
