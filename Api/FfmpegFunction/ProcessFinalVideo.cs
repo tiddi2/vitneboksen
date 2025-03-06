@@ -4,39 +4,46 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Shared;
+using Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 namespace FfmpegFunction
 {
-    public class CombineSessionVideos
+    public class ProcessFinalVideo
     {
-        private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-        public CombineSessionVideos(ILoggerFactory loggerFactory, IConfiguration configuration)
+        public ProcessFinalVideo(ILoggerFactory loggerFactory, IConfiguration configuration)
         {
-            _logger = loggerFactory.CreateLogger<FormatTestimony>();
             _configuration = configuration;
         }
 
-        [Function("CombineSessionVideos")]
-        public async Task Run([BlobTrigger("{sessionContainer}/combineVideoStarted", Connection = "AzureWebJobsStorage")] byte[] blobContent, FunctionContext context, string blobName)
+        [Function("ProcessFinalVideo")]
+        public async Task Run([BlobTrigger("final-video-processing-requests/{sessionContainerName}", Connection = "AzureWebJobsStorage")] byte[] blobContent,
+            string sessionContainerName
+            )
         {
-            var sessionKey = "noe";
-            var session = new Session("noe", []);
+            var processingRequest = JsonSerializer.Deserialize<FinalVideoProcessingRequest>(blobContent);
+            var sessionKey = processingRequest.sessionKey;
+
             using var blobContentStream = new MemoryStream(blobContent);
 
             var connectionString = _configuration.GetConnectionString("AzureWebJobsStorage");
 
-            var blobService = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
+            var blobService = new BlobServiceClient(connectionString);
             var tempPath = Path.Combine(Path.GetTempPath(), $"vitne-{Guid.NewGuid()}");
             Directory.CreateDirectory(tempPath);
 
             await DownloadResources(blobService, tempPath);
 
             var containerClient = Helpers.GetContainerBySessionKey(blobService, sessionKey);
+
+            var sessionInfoBlobClient = containerClient.GetBlobClient(Constants.SessionInfoFileName);
+
+            var session = JsonSerializer.Deserialize<Session>((await sessionInfoBlobClient.DownloadContentAsync()).Value.Content);
 
             var blobs = containerClient.GetBlobs().Where(blob => blob.Name.EndsWith(".mp4"));
             var transitions = await CreateTransitionsFromBlobs(blobs.ToList(), tempPath);
@@ -70,20 +77,23 @@ namespace FfmpegFunction
                             fileListWriter.WriteLine($"file '{transitionFileName}'");
                         }
                         await AddBlobToFileList(fileListWriter, containerClient, blobItem.Name, tempPath);
-
                     }
                 }
 
-                var concatFilePath = Path.Combine(tempPath, Constants.ConcatinatedVideoFileName);
+                var concatFilePath = Path.Combine(tempPath, Constants.FinalVideoFileName);
                 await Helpers.ExecuteFFmpegCommand($"-f concat -safe 0 -i {fileListPath} -c:v copy -c:a aac -ar 48000 {concatFilePath}");
 
                 var file = File.OpenRead(concatFilePath);
-                await containerClient.UploadBlobAsync(Constants.ConcatinatedVideoFileName, file);
+                await containerClient.UploadBlobAsync(Constants.FinalVideoFileName, file);
                 file.Close();
             }
             finally
             {
                 Directory.Delete(tempPath, true);
+
+                var finalVideoProcessingContainerClient = blobService.GetBlobContainerClient(Constants.FinalVideoProcessingContainer);
+                var finalVideoRequestBlob = finalVideoProcessingContainerClient.GetBlobClient(sessionKey);
+                finalVideoRequestBlob.DeleteIfExists();
             }
             return;
         }

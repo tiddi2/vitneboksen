@@ -37,8 +37,10 @@ const Testimony = () => {
   const [testimonialCount, setTestimonialCount] = useState(null);
   const [actionShotCount, setActionShotCount] = useState(null);
 
-  const [concatCompleted, setConcatCompleted] = useState(false);
-  const [concatProcessStarted, setConcatProcessStarted] = useState(false);
+  const [finalVideoProcessingStarted, setFinalVideoProcessingStarted] =
+    useState(false);
+  const [finalVideoProcessingCompleted, setFinalVideoProcessingCompleted] =
+    useState(false);
   const [sessionWaiting, setSessionWaiting] = useState(false);
   const [sessionFetchTime, setSessionFetchTime] = useState(null);
 
@@ -55,7 +57,8 @@ const Testimony = () => {
         testimonials,
         actionshots,
         lastUpload,
-        concatCompleted,
+        finalVideoCompleted,
+        finalVideoStarted,
         questions,
         sessionName,
       } = await getOrCreateSession(sessionKey);
@@ -67,10 +70,10 @@ const Testimony = () => {
         setSharedKey(newSharedKey);
         setSessionName(sessionName);
         setQuestions(questions);
-        setConcatCompleted(concatCompleted);
+        setFinalVideoProcessingCompleted(finalVideoCompleted);
+        setFinalVideoProcessingStarted(finalVideoStarted);
         localStorage.setItem("sessionKey", newSessionKey);
         localStorage.setItem("sharedKey", newSharedKey);
-        localStorage.setItem("concatProcessStarted", false);
       }
       setSessionWaiting(false);
       setSessionFetchTime(Date.now());
@@ -88,9 +91,6 @@ const Testimony = () => {
 
   useEffect(() => {
     setWaitTime(JSON.parse(localStorage.getItem("waitTime")) || 30000);
-    setConcatProcessStarted(
-      JSON.parse(localStorage.getItem("concatProcessStarted")) || false
-    );
     if (sessionKey) {
       GetSession(sessionKey);
     }
@@ -193,8 +193,6 @@ const Testimony = () => {
           videoElement.srcObject = null;
           videoElement.src = null;
           setCountdown(waitTime / 1000);
-          setConcatProcessStarted(false);
-          localStorage.setItem("concatProcessStarted", false);
           countdownInterval = setInterval(() => {
             setCountdown((prevCountdown) => prevCountdown - 1);
           }, 1000);
@@ -318,8 +316,6 @@ const Testimony = () => {
               videoElement.srcObject = null;
               videoElement.src = null;
               setCountdown(waitTime / 1000);
-              setConcatProcessStarted(false);
-              localStorage.setItem("concatProcessStarted", false);
               let manualCountdownInterval = setInterval(() => {
                 setCountdown((prevCountdown) => prevCountdown - 1);
               }, 1000);
@@ -424,9 +420,8 @@ const Testimony = () => {
           testimonialCount={testimonialCount}
           actionShotCount={actionShotCount}
           lastUpload={lastUpload}
-          setConcatProcessStarted={setConcatProcessStarted}
-          concatProcessStarted={concatProcessStarted}
-          concatCompleted={concatCompleted}
+          finalVideoProcessingStarted={finalVideoProcessingStarted}
+          finalVideoProcessingCompleted={finalVideoProcessingCompleted}
           sharedKey={sharedKey}
           deleteSessionClick={deleteSessionClick}
           setQuestions={(setter) => {

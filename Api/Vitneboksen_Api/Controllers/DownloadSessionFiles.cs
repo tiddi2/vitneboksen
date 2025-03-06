@@ -25,7 +25,7 @@ public static class DownloadSessionFiles
         {
             await foreach (var blobItem in blobs)
             {
-                if (blobItem.Blob.Name == Constants.ConcatinatedVideoFileName)
+                if (blobItem.Blob.Name == Constants.FinalVideoFileName)
                 {
                     continue;
                 }

@@ -8,7 +8,8 @@ string SessionKey,
 string SharingKey,
 int Testimonials,
 int Actionshots,
-bool ConcatCompleted,
+bool FinalVideoCompleted,
+bool FinalVideoStarted,
 DateTimeOffset? LastUpload,
 List<Question> Questions);
 
@@ -23,3 +24,4 @@ public record Question(
     [property: JsonPropertyName("recordTime")] int RecordTime,
     [property: JsonPropertyName("order")] int Order = 0
     );
+

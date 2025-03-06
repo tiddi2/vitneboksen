@@ -28,7 +28,7 @@ public static class GetSession
         var testimonials = blobs.Count(b => b.Name.Contains(Constants.VideoTypes.Testimonial));
         var actionshots = blobs.Count(b => b.Name.Contains(Constants.VideoTypes.ActionShot));
 
-        var latestUploadTime = blobs.Where(b => b.Name != Constants.ConcatinatedVideoFileName).MaxBy(b => b.Properties.CreatedOn)?.Properties.CreatedOn;
+        var latestUploadTime = blobs.Where(b => b.Name != Constants.FinalVideoFileName).MaxBy(b => b.Properties.CreatedOn)?.Properties.CreatedOn;
 
         var blobClient = containerClient.GetBlobClient(Constants.SessionInfoFileName);
         var session = new Session("", []);
@@ -48,13 +48,17 @@ public static class GetSession
             await Helpers.UploadJsonToStorage(blobClient, session);
         }
 
+        var finalVideoContainerClient = blobService.GetBlobContainerClient(Constants.FinalVideoProcessingContainer);
+        var finalVideoProcessingBlob = finalVideoContainerClient.GetBlobClient(sessionKey);
+
         return Results.Ok(new SessionStatus(
-            session.SessionName,
-            sessionKey!,
-            sharingKey,
-            testimonials,
-            actionshots,
-            blobs.Any(b => b.Name == Constants.ConcatinatedVideoFileName),
+            SessionName: session.SessionName,
+            SessionKey: sessionKey!,
+            SharingKey: sharingKey,
+            Testimonials: testimonials,
+            Actionshots: actionshots,
+            FinalVideoCompleted: blobs.Any(b => b.Name == Constants.FinalVideoFileName),
+            FinalVideoStarted: finalVideoProcessingBlob.Exists(),
             latestUploadTime,
             session.Questions));
     }

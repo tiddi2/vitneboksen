@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using Shared;
+using Shared.Models;
 
 namespace Vitneboksen_Api.Controllers;
 
@@ -9,22 +10,21 @@ public static class UploadVideo
     {
         var blobService = new BlobServiceClient(constring);
         BlobContainerClient containerClient;
-
         if (videoType == Constants.VideoTypes.Testimonial)
         {
-            var sessionKey = req.Query["sessionKey"];
-            containerClient = Helpers.GetContainerBySessionKey(blobService, sessionKey);
+            containerClient = Helpers.GetContainerBySessionKey(blobService, req.Query["sessionKey"]);
         }
         else
         {
-            var sharedKey = req.Query["sharedKey"];
-            containerClient = Helpers.GetContainerBySharedKey(blobService, sharedKey);
+            containerClient = Helpers.GetContainerBySharedKey(blobService, req.Query["sharedKey"]);
         }
+
+        var sessionKey = containerClient.Name.Split("-").First();
 
         var formdata = await req.ReadFormAsync();
         var videoFile = req.Form.Files.FirstOrDefault(f => f.Name == "video");
         var subFile = req.Form.Files.FirstOrDefault(f => f.Name == "sub");
-        if (videoFile == null || subFile == null)
+        if (videoFile == null || (videoType == Constants.VideoTypes.Testimonial && subFile == null))
         {
             return Results.BadRequest("No file, stupid.");
         }
@@ -34,13 +34,20 @@ public static class UploadVideo
             return Results.NotFound("Not found");
         }
 
-        var tempFolder = Helpers.GetUnprocessedFileName(containerClient.Name, Guid.NewGuid(), videoType);
-        var videoFileName = $"{tempFolder}.mp4";
-        var subFileName = $"{tempFolder}.srt";
+        var videoMetadata = new VideoFileMetaData(
+            id: Guid.NewGuid(),
+            createdOn: DateTimeOffset.Now,
+            videoType: videoType,
+            sessionKey: sessionKey
+            );
+
+        var videoFileName = videoMetadata.GetVideoFileName();
+        var subFileName = videoMetadata.GetSubFileName();
 
         var unprocessedContainer = Helpers.GetUnprocessedContainer(blobService);
         await unprocessedContainer.UploadBlobAsync(videoFileName, videoFile.OpenReadStream());
-        await unprocessedContainer.UploadBlobAsync(subFileName, subFile.OpenReadStream());
+        if (subFile != null)
+            await unprocessedContainer.UploadBlobAsync(subFileName, subFile.OpenReadStream());
 
         return Results.Created();
     }

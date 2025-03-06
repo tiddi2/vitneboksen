@@ -29,9 +29,9 @@ app.MapGet("/get-shared-session", async Task<IResult> (HttpRequest request) => a
 
 app.MapGet("/download-session-files", async Task<IResult> (HttpRequest request) => await DownloadSessionFiles.Run(request, storageConnectionString));
 
-app.MapGet("/create-concatenated-video", async Task<IResult> (HttpRequest request) => await CreateConcatinatedVideo.Run(request, storageConnectionString));
+app.MapGet("/start-final-video-processing", async Task<IResult> (HttpRequest request) => await StartFinalVideoProcessing.Run(request, storageConnectionString));
 
-app.MapGet("/download-concatenated-video", async Task<IResult> (HttpRequest request) => await DownloadConcatFile.Run(request, storageConnectionString));
+app.MapGet("/download-final-video", async Task<IResult> (HttpRequest request) => await DownloadFinalVideo.Run(request, storageConnectionString));
 
 app.MapDelete("/delete-session", async Task<IResult> (HttpRequest request) => await DeleteSession.Run(request, storageConnectionString));
 

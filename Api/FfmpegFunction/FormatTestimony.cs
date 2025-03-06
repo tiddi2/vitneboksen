@@ -2,6 +2,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Shared;
+using Shared.Models;
 using System;
 using System.IO;
 using System.Linq;
@@ -21,7 +22,9 @@ namespace FfmpegFunction
         [Function("FormatTestimony")]
         public async Task Run([BlobTrigger("unprocessed/{blobName}", Connection = "AzureWebJobsStorage")] byte[] blobContent, FunctionContext context, string blobName)
         {
-            if (blobName.EndsWith(".srt"))
+            var fileMetaData = VideoFileMetaData.GetVideoFileMetaDataFromFileName(blobName);
+
+            if (!blobName.EndsWith(".mp4"))
                 return;
 
             using var blobContentStream = new MemoryStream(blobContent);
@@ -29,11 +32,7 @@ namespace FfmpegFunction
             var connectionString = _configuration.GetConnectionString("AzureWebJobsStorage");
 
             var blobService = new Azure.Storage.Blobs.BlobServiceClient(connectionString);
-            var sessionKeyPair = Helpers.GetSessionKeyPairFromUnprocessedFileName(blobName);
             var blobNameBase = blobName.Split('.').First();
-            var videoType = blobNameBase.Split("|").Last();
-
-            var sessionKey = sessionKeyPair.Split("-").First();
 
             var unprocessedContainer = Helpers.GetUnprocessedContainer(blobService);
             if (unprocessedContainer == null)
@@ -41,9 +40,10 @@ namespace FfmpegFunction
                 throw new Exception("No container found");
             }
 
-            var subfileBlobclient = unprocessedContainer.GetBlobClient($"{blobNameBase}.srt");
             var videofileBlobClient = unprocessedContainer.GetBlobClient(blobName);
-            var tempFolder = $"{sessionKey}-{Guid.NewGuid()}";
+            var subfileBlobclient = unprocessedContainer.GetBlobClient($"{blobNameBase}.srt");
+            var tempFolder = $"{fileMetaData.SessionKey}-{fileMetaData.Id}";
+
             var tempPath = Path.Combine(Path.GetTempPath(), tempFolder);
             Directory.CreateDirectory(tempPath);
             var videoFilePath = Path.Combine(tempPath, "file.mp4");
@@ -53,16 +53,17 @@ namespace FfmpegFunction
             {
                 await blobContentStream.CopyToAsync(fileStream);
             }
+            if (subfileBlobclient.Exists())
+                await subfileBlobclient.DownloadToAsync(subFilePath);
 
-            await subfileBlobclient.DownloadToAsync(subFilePath);
-            var sessionContainer = Helpers.GetContainerBySessionKey(blobService, sessionKey);
+            var sessionContainer = Helpers.GetContainerBySessionKey(blobService, fileMetaData.SessionKey);
             try
             {
-                string outputFilePath = Path.Combine(tempPath, $"{DateTime.Now.ToFileTimeUtc()}-{videoType}.mp4");
+                string outputFilePath = Path.Combine(tempPath, $"{fileMetaData.CreatedOn.UtcDateTime.ToFileTimeUtc()}-{fileMetaData.VideoType}.mp4");
 
                 string ffmpegCmd;
 
-                if (videoType == Constants.VideoTypes.Testimonial)
+                if (fileMetaData.VideoType == Constants.VideoTypes.Testimonial)
                 {
                     ffmpegCmd = $"-i \"{videoFilePath}\" -filter:a \"volume=3\" -vf \"scale=-1:1080,pad=1920:1080:(1920-iw)/2:(1080-ih)/2,subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -c:v libx264 -c:a aac -ar 48000  \"{outputFilePath}\"";
                 }
@@ -70,6 +71,7 @@ namespace FfmpegFunction
                 {
                     ffmpegCmd = $"-i \"{videoFilePath}\" -filter:a \"volume=3\" -vf \"scale=-1:720,pad=1280:720:(1280-iw)/2:(720-ih)/2\" -r 30 -c:v libx264 -c:a aac -ar 48000 \"{outputFilePath}\"";
                 }
+
                 await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 
                 var fileInfo = new FileInfo(outputFilePath);
@@ -83,14 +85,11 @@ namespace FfmpegFunction
                     throw new Exception("FFmpeg processing failed.");
                 }
 
-                await videofileBlobClient.DeleteAsync();
-                await subfileBlobclient.DeleteAsync();
+                await videofileBlobClient.DeleteIfExistsAsync();
+                await subfileBlobclient.DeleteIfExistsAsync();
 
-                var blob = sessionContainer.GetBlobClient(Constants.ConcatinatedVideoFileName);
-                if (blob.Exists())
-                {
-                    await blob.DeleteAsync();
-                }
+                var blob = sessionContainer.GetBlobClient(Constants.FinalVideoFileName);
+                await blob.DeleteIfExistsAsync();
             }
             finally
             {

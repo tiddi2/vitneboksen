@@ -1,7 +1,7 @@
 import "./Settings.css";
 
 import React, { useState } from "react";
-import { generateConcatenatedVideo } from "../../Services/vitneboksService";
+import { startFinalVideoProcessing } from "../../Services/vitneboksService";
 import NewQuestion from "../NewQuestion/NewQuestion";
 import CloseButton from "../CloseButton/CloseButton";
 
@@ -18,9 +18,8 @@ const Settings = ({
   testimonialCount,
   actionShotCount,
   lastUpload,
-  setConcatProcessStarted,
-  concatProcessStarted,
-  concatCompleted,
+  finalVideoProcessingStarted,
+  finalVideoProcessingCompleted,
   sharedKey,
   deleteSessionClick,
   setQuestions,
@@ -277,45 +276,45 @@ const Settings = ({
                 <span>{new Date(lastUpload).toLocaleString()}</span>
               </div>
             )}
-            {testimonialCount + actionShotCount >= 1 && !concatCompleted && (
-              <div>
-                <span>
-                  Vitneboksvideoen <br /> - Samle alle videoene til én fil.
-                </span>
-                <button
-                  className="button"
-                  disabled={concatProcessStarted}
-                  onClick={async () => {
-                    setConcatProcessStarted(true);
-                    await generateConcatenatedVideo(sessionKey, sessionName);
-                    setConcatProcessStarted(false);
-                    GetSession(sessionKey);
-                  }}
-                >
-                  {!concatProcessStarted ? (
-                    "Lag video"
-                  ) : (
-                    <span className="spinner">🤖</span>
-                  )}
-                </button>
-              </div>
-            )}
-            {actionShotCount + testimonialCount >= 1 && concatCompleted && (
-              <div>
-                <span>
-                  Vitneboksvideoen <br /> - Samle alle videoene til én fil.
-                </span>
-                <button
-                  onClick={() =>
-                    handleDownload(
-                      `download-concatenated-video?sessionKey=${sessionKey}`
-                    )
-                  }
-                >
-                  Last ned
-                </button>
-              </div>
-            )}
+            {testimonialCount + actionShotCount >= 1 &&
+              !finalVideoProcessingCompleted && (
+                <div>
+                  <span>
+                    Vitneboksvideoen <br /> - Samle alle videoene til én fil.
+                  </span>
+                  <button
+                    className="button"
+                    disabled={finalVideoProcessingStarted}
+                    onClick={async () => {
+                      await startFinalVideoProcessing(sessionKey, sessionName);
+                      GetSession(sessionKey);
+                    }}
+                  >
+                    {!finalVideoProcessingStarted ? (
+                      "Lag video"
+                    ) : (
+                      <span className="spinner">🤖</span>
+                    )}
+                  </button>
+                </div>
+              )}
+            {actionShotCount + testimonialCount >= 1 &&
+              finalVideoProcessingCompleted && (
+                <div>
+                  <span>
+                    Vitneboksvideoen <br /> - Samle alle videoene til én fil.
+                  </span>
+                  <button
+                    onClick={() =>
+                      handleDownload(
+                        `download-final-video?sessionKey=${sessionKey}`
+                      )
+                    }
+                  >
+                    Last ned
+                  </button>
+                </div>
+              )}
             <div>
               <span>Vitneboks-ID:</span>
               <input type="text" value={sessionKey} disabled={true} />
