@@ -8,12 +8,7 @@ import {
 } from "../../Services/vitneboksService";
 import "./Testimony.css";
 import Settings from "../Settings/Settings";
-import {
-  GetRecordingConstrains,
-  downloadFile,
-  getSrtFile,
-  prepFile,
-} from "../../utilities";
+import { GetRecordingConstrains, prepFile } from "../../utilities";
 import Footer from "../Footer/Footer";
 
 const Testimony = () => {
