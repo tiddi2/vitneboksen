@@ -149,6 +149,8 @@ const Testimony = () => {
         setRecording(true);
         setCountdown(currentQuestion.recordTime / 1000);
 
+        checkAudioLevel(stream, 3000);
+
         countdownInterval = setInterval(() => {
           if (recorder.state === "inactive") {
             clearInterval(countdownInterval);
@@ -207,6 +209,44 @@ const Testimony = () => {
     } catch (error) {
       console.error("Error accessing webcam:", error);
     }
+  };
+
+  const checkAudioLevel = (stream, durationMs = 3000) => {
+    const audioContext = new AudioContext();
+    const analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
+
+    analyser.fftSize = 256;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    let silentSamples = 0;
+    let lowSamples = 0;
+    const sampleIntervalMs = 100;
+    const silenceThreshold = 5;
+
+    const checkSilence = () => {
+      analyser.getByteFrequencyData(dataArray);
+      const averageLevel =
+        dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
+
+      if (averageLevel === 0) {
+        silentSamples++;
+      } else if (averageLevel < silenceThreshold) {
+        lowSamples++;
+      }
+      if (silentSamples > 10) {
+        alert("Ingen lyd oppdaget. Sjekk mikrofoninstillinger.");
+      } else if (lowSamples * sampleIntervalMs >= durationMs) {
+        alert("Lav lyd opptaket. Sjekk mikrofoninstillingene.");
+      } else {
+        if (stream.active) {
+          setTimeout(checkSilence, sampleIntervalMs);
+        }
+      }
+    };
+
+    checkSilence();
   };
 
   const handleKeyPress = async (event) => {
