@@ -57,9 +57,7 @@ namespace FfmpegFunction
                 var introSourcePath = Path.Combine(tempPath, Constants.IntroFileName);
                 var introDestinationPath = Path.Combine(tempPath, "intro-with-sub.mp4");
 
-                var ffmpegCmd = OperatingSystem.IsWindows() ?
-                $"-i \"{introSourcePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}:force_style='Alignment=10'\" -c:v libx264 -c:a aac -ar 48000 \"{introDestinationPath}\""
-                : $"-i \"{introSourcePath}\" -vf \"subtitles='{subFilePath}:force_style='Alignment=10'\" -c:v libx264 -c:a aac -ar 48000 \"{introDestinationPath}\"";
+                var ffmpegCmd = $"-i \"{introSourcePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}:force_style='Alignment=10'\" -c:v libx264 -c:a aac -ar 48000 \"{introDestinationPath}\"";
                 await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
 
                 // Create a MemoryStream to store the zip file

@@ -19,7 +19,7 @@ public class VideoFileMetaData(
 
     public string GetSubFileName()
     {
-        return $"{Id}&{CreatedOn.ToUnixTimeSeconds()}&{VideoType}&{SessionKey}.srt";
+        return $"{Id}&{CreatedOn.ToUnixTimeSeconds()}&{VideoType}&{SessionKey}.txt";
     }
 
     public static VideoFileMetaData GetVideoFileMetaDataFromFileName(string fileName)

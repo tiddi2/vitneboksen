@@ -162,26 +162,14 @@ const Testimony = () => {
             "mp4"
           );
 
-          const { blob: srtBlob } = getSrtFile(
-            currentQuestion.recordTime / 1000,
-            currentQuestion.text
+          await uploadTestimony(
+            sessionKey,
+            videoBlob,
+            videoFileName,
+            currentQuestion.text,
+            videoFileName.replace("mp4", "srt")
           );
-
-          // Save video
-          if (!sessionKey) {
-            downloadFile(videoBlob, videoFileName);
-            downloadFile(srtBlob, videoFileName.replace("mp4", "srt"));
-          } else {
-            // upload video
-            await uploadTestimony(
-              sessionKey,
-              videoBlob,
-              videoFileName,
-              srtBlob,
-              videoFileName.replace("mp4", "srt")
-            );
-            await GetSession(sessionKey);
-          }
+          await GetSession(sessionKey);
         };
 
         setTimeout(async () => {

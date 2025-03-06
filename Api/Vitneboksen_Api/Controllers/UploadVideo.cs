@@ -1,4 +1,5 @@
 using Azure.Storage.Blobs;
+using Microsoft.Extensions.Primitives;
 using Shared;
 using Shared.Models;
 
@@ -23,8 +24,12 @@ public static class UploadVideo
 
         var formdata = await req.ReadFormAsync();
         var videoFile = req.Form.Files.FirstOrDefault(f => f.Name == "video");
-        var subFile = req.Form.Files.FirstOrDefault(f => f.Name == "sub");
-        if (videoFile == null || (videoType == Constants.VideoTypes.Testimonial && subFile == null))
+        string? subText = null;
+
+        if (req.Form.TryGetValue("sub", out StringValues sub))
+            subText = sub.ToString();
+
+        if (videoFile == null || (videoType == Constants.VideoTypes.Testimonial && subText == null))
         {
             return Results.BadRequest("No file, stupid.");
         }
@@ -42,12 +47,15 @@ public static class UploadVideo
             );
 
         var videoFileName = videoMetadata.GetVideoFileName();
-        var subFileName = videoMetadata.GetSubFileName();
-
         var unprocessedContainer = Helpers.GetUnprocessedContainer(blobService);
         await unprocessedContainer.UploadBlobAsync(videoFileName, videoFile.OpenReadStream());
-        if (subFile != null)
-            await unprocessedContainer.UploadBlobAsync(subFileName, subFile.OpenReadStream());
+
+        if (subText != null)
+        {
+            var subFileName = videoMetadata.GetSubFileName();
+            var subTextBlobClient = unprocessedContainer.GetBlobClient(subFileName);
+            await Helpers.UploadJsonToStorage(subTextBlobClient, subText);
+        }
 
         return Results.Created();
     }
