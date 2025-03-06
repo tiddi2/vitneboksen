@@ -25,8 +25,8 @@ public static class GetSession
         }
 
         var blobs = containerClient.GetBlobs();
-        var testimonials = blobs.Count(b => b.Name.Contains("testimonial.mp4"));
-        var actionshots = blobs.Count(b => b.Name.Contains("actionshot.mp4"));
+        var testimonials = blobs.Count(b => b.Name.Contains(Constants.VideoTypes.Testimonial));
+        var actionshots = blobs.Count(b => b.Name.Contains(Constants.VideoTypes.ActionShot));
 
         var latestUploadTime = blobs.Where(b => b.Name != Constants.ConcatinatedVideoFileName).MaxBy(b => b.Properties.CreatedOn)?.Properties.CreatedOn;
 
