@@ -1,3 +1,4 @@
+using Azure.Storage.Blobs;
 using Shared;
 
 namespace Vitneboksen_Api.Controllers;
@@ -6,8 +7,19 @@ public static class UploadVideo
 {
     public static async Task<IResult> Run(HttpRequest req, string videoType, string constring)
     {
-        var blobService = new Azure.Storage.Blobs.BlobServiceClient(constring);
-        string? sessionKey = req.Query["sessionKey"];
+        var blobService = new BlobServiceClient(constring);
+        BlobContainerClient containerClient;
+
+        if (videoType == Constants.VideoTypes.Testimonial)
+        {
+            var sessionKey = req.Query["sessionKey"];
+            containerClient = Helpers.GetContainerBySessionKey(blobService, sessionKey);
+        }
+        else
+        {
+            var sharedKey = req.Query["sharedKey"];
+            containerClient = Helpers.GetContainerBySharedKey(blobService, sharedKey);
+        }
 
         var formdata = await req.ReadFormAsync();
         var videoFile = req.Form.Files.FirstOrDefault(f => f.Name == "video");
@@ -17,7 +29,6 @@ public static class UploadVideo
             return Results.BadRequest("No file, stupid.");
         }
 
-        var containerClient = Helpers.GetContainerBySessionKey(blobService, sessionKey);
         if (containerClient == null)
         {
             return Results.NotFound("Not found");

@@ -49,7 +49,7 @@ namespace Shared
 
         public static async Task ExecuteFFmpegCommand(string arguments)
         {
-            var ffmpegFileName = Path.Combine(Environment.CurrentDirectory,
+            var ffmpegFileName = Path.Combine("C:\\home\\site\\wwwroot",
                 IsRunningOnWindows() ? "ffmpeg.exe" : "ffmpeg");
 
             var ffmpegStartInfo = new ProcessStartInfo
