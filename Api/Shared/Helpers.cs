@@ -1,7 +1,7 @@
 ﻿using Azure.Storage.Blobs;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Text;
-using System.Text.Json;
 
 namespace Shared
 {
@@ -39,7 +39,7 @@ namespace Shared
 
         public static async Task UploadJsonToStorage(BlobClient blobClient, object objectToSave)
         {
-            var serializedObject = JsonSerializer.Serialize(objectToSave);
+            var serializedObject = JsonConvert.SerializeObject(objectToSave);
             await blobClient.UploadAsync(BinaryData.FromString(serializedObject), overwrite: true);
         }
 

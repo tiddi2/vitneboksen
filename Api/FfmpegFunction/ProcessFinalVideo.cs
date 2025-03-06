@@ -49,16 +49,18 @@ namespace FfmpegFunction
             var transitions = await CreateTransitionsFromBlobs(blobs.ToList(), tempPath);
             try
             {
-                var subFilePath = Path.Combine(tempPath, "intro.srt");
-
-                var srtContent = $"1\n00:00:03,650 --> 00:00:06,800\n{session.SessionName?.ToUpper() ?? string.Empty}\n";
-                File.WriteAllText(subFilePath, srtContent);
-
+                //Intro
                 var introSourcePath = Path.Combine(tempPath, Constants.IntroFileName);
                 var introDestinationPath = Path.Combine(tempPath, "intro-with-sub.mp4");
 
-                var ffmpegCmd = $"-i \"{introSourcePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}:force_style='Alignment=10'\" -c:v libx264 -c:a aac -ar 48000 \"{introDestinationPath}\"";
-                await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
+                await Helpers.ExecuteFFmpegCommand(FfmpegCommandBuilder.WithText(
+                    sourceVideoPath: introSourcePath,
+                    subtitles: session.SessionName,
+                    outputVideoPath: introDestinationPath,
+                    fontSize: 80,
+                    TextPlacement.Centered,
+                    startTime: 3.6,
+                    endTime: 6));
 
                 // Create a MemoryStream to store the zip file
                 using var memoryStream = new MemoryStream();
@@ -67,7 +69,6 @@ namespace FfmpegFunction
                 using (var fileListWriter = new StreamWriter(fileListPath))
                 {
                     fileListWriter.WriteLine($"file '{introDestinationPath}'");
-
                     foreach (var blobItem in blobs)
                     {
                         if (transitions.TryGetValue(blobItem.Name, out var transitionFileName))
@@ -79,7 +80,8 @@ namespace FfmpegFunction
                 }
 
                 var concatFilePath = Path.Combine(tempPath, Constants.FinalVideoFileName);
-                await Helpers.ExecuteFFmpegCommand($"-f concat -safe 0 -i {fileListPath} -c:v copy -c:a aac -ar 48000 {concatFilePath}");
+                var concatFfmpegCommand = FfmpegCommandBuilder.ConcatVideos(fileListPath, concatFilePath);
+                await Helpers.ExecuteFFmpegCommand(concatFfmpegCommand);
 
                 var file = File.OpenRead(concatFilePath);
                 await containerClient.UploadBlobAsync(Constants.FinalVideoFileName, file);
@@ -114,6 +116,7 @@ namespace FfmpegFunction
             await transitionBlobClient.DownloadToAsync(Path.Combine(tempPath, Constants.TransitionFileName));
         }
 
+
         private static async Task<Dictionary<string, string>> CreateTransitionsFromBlobs(List<BlobItem> blobs, string tempPath)
         {
             var norwegianTimeZone = TimeZoneInfo.FindSystemTimeZoneById(OperatingSystem.IsWindows() ? "Central Europe Standard Time" : "Europe/Oslo");
@@ -124,20 +127,14 @@ namespace FfmpegFunction
 
             foreach (var blob in filteredElements)
             {
-                var subFilePath = Path.Combine(tempPath, $"transition-{blob.Name}.srt");
-                // Get the Norwegian timezone
-
                 // Convert the DateTimeOffset to Norwegian time
                 var norwegianTime = TimeZoneInfo.ConvertTime(blob.Properties.CreatedOn!.Value, norwegianTimeZone);
-                var srtContent = $"1\n00:00:00,000 --> 00:00:01,250\nkl. {norwegianTime.ToString("HH:mm")}\n";
-                File.WriteAllText(subFilePath, srtContent);
+                var srtContent = $"kl. {norwegianTime.ToString("HH:mm")}";
 
                 var transitionSourcePath = Path.Combine(tempPath, Constants.TransitionFileName);
                 var transitionDestinationPath = Path.Combine(tempPath, $"transition-{blob.Name}");
 
-                var ffmpegCmd = $"-i \"{transitionSourcePath}\" -vf \"subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}:force_style='Alignment=10'\" -c:v libx264 -c:a aac -ar 48000 \"{transitionDestinationPath}\"";
-
-                await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
+                await Helpers.ExecuteFFmpegCommand(FfmpegCommandBuilder.WithText(transitionSourcePath, srtContent, transitionDestinationPath, fontSize: 80, TextPlacement.Centered));
 
                 transitions.Add(blob.Name, transitionDestinationPath);
             }

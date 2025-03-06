@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Shared;
 using Shared.Models;
 using System;
@@ -53,7 +54,7 @@ namespace FfmpegFunction
             }
             string? subtitleText = null;
             if (subfileBlobclient.Exists())
-                subtitleText = (await subfileBlobclient.DownloadContentAsync()).Value.Content.ToString();
+                subtitleText = JsonConvert.DeserializeObject<string>((await subfileBlobclient.DownloadContentAsync()).Value.Content.ToString());
 
             var sessionContainer = Helpers.GetContainerBySessionKey(blobService, fileMetaData.SessionKey);
             try
@@ -64,15 +65,12 @@ namespace FfmpegFunction
 
                 if (subtitleText != null)
                 {
-                    ffmpegCmd = $"-i \"{videoFilePath}\" -filter:a \"volume=3\" -vf \"scale=-1:1080," +
-                        $"pad=1920:1080:(1920-iw)/2:(1080-ih)/2," +
-                        $"drawtext=text='{subtitleText}':fontcolor=white:fontsize=70:x=(w-text_w)/2:y=h-100:line_spacing=10:box=1:boxcolor=black@0.5\"" +
-                        $" -r 30 -c:v libx264 -c:a aac -ar 48000  \"{outputFilePath}\"";
-                    //ffmpegCmd = $"-i \"{videoFilePath}\" -filter:a \"volume=3\" -vf \"scale=-1:1080,pad=1920:1080:(1920-iw)/2:(1080-ih)/2,subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -c:v libx264 -c:a aac -ar 48000  \"{outputFilePath}\"";
+                    ffmpegCmd = FfmpegCommandBuilder.WithText(videoFilePath, subtitleText, outputFilePath, fontSize: 50, TextPlacement.Subtitle);
                 }
                 else
                 {
-                    ffmpegCmd = $"-i \"{videoFilePath}\" -filter:a \"volume=3\" -vf \"scale=-1:720,pad=1280:720:(1280-iw)/2:(720-ih)/2\" -r 30 -c:v libx264 -c:a aac -ar 48000 \"{outputFilePath}\"";
+                    ffmpegCmd = FfmpegCommandBuilder.HandheldFormat(sourceVideoPath: videoFilePath, outputFilePath);
+
                 }
 
                 await Helpers.ExecuteFFmpegCommand(ffmpegCmd);
