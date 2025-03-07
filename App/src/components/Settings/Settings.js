@@ -13,8 +13,6 @@ const Settings = ({
   sessionKey,
   GetSession,
   setInputKey,
-  sessionFetchTime,
-  sessionWaiting,
   testimonialCount,
   actionShotCount,
   lastUpload,
@@ -29,6 +27,15 @@ const Settings = ({
 }) => {
   const [isEditingQuestion, setIsEditingQuestion] = useState(false);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
+  const [localSessionName, setLocalSessionName] = useState();
+
+  const handleSessionNameChange = (e) => {
+    setSessionName(localSessionName);
+  };
+
+  useEffect(() => {
+    setLocalSessionName(sessionName);
+  }, [sessionName]);
 
   const handleDownload = (url) => {
     const link = document.createElement("a");
@@ -264,8 +271,9 @@ const Settings = ({
               <span>Arrangementnavn:</span>
               <input
                 type="test"
-                value={sessionName}
-                onChange={(e) => setSessionName(e.target.value)}
+                value={localSessionName}
+                onBlur={handleSessionNameChange}
+                onChange={(e) => setLocalSessionName(e.target.value)}
               />
             </div>
             <div>

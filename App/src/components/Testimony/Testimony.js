@@ -36,12 +36,9 @@ const Testimony = () => {
     useState(false);
   const [finalVideoProcessingCompleted, setFinalVideoProcessingCompleted] =
     useState(false);
-  const [sessionWaiting, setSessionWaiting] = useState(false);
-  const [sessionFetchTime, setSessionFetchTime] = useState(null);
 
   const GetSession = useCallback(
     async (sessionKey = inputKey) => {
-      setSessionWaiting(true);
       if (sessionKey == null) {
         sessionKey = localStorage.getItem("sessionKey");
       }
@@ -70,8 +67,6 @@ const Testimony = () => {
         localStorage.setItem("sessionKey", newSessionKey);
         localStorage.setItem("sharedKey", newSharedKey);
       }
-      setSessionWaiting(false);
-      setSessionFetchTime(Date.now());
     },
     [inputKey, recording]
   );
@@ -397,8 +392,6 @@ const Testimony = () => {
           sessionKey={sessionKey}
           GetSession={GetSession}
           setInputKey={setInputKey}
-          sessionFetchTime={sessionFetchTime}
-          sessionWaiting={sessionWaiting}
           testimonialCount={testimonialCount}
           actionShotCount={actionShotCount}
           lastUpload={lastUpload}
