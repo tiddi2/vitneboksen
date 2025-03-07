@@ -51,7 +51,7 @@ namespace FfmpegFunction
             {
                 //Intro
                 var introSourcePath = Path.Combine(tempPath, Constants.IntroFileName);
-                var introDestinationPath = Path.Combine(tempPath, "intro-with-sub.mp4");
+                var introDestinationPath = Path.Combine(tempPath, "intro-processed.mp4");
 
                 await Helpers.ExecuteFFmpegCommand(FfmpegCommandBuilder.WithText(
                     sourceVideoPath: introSourcePath,
@@ -61,6 +61,17 @@ namespace FfmpegFunction
                     TextPlacement.Centered,
                     startTime: 3.6,
                     endTime: 6));
+
+                var outroSourcePath = Path.Combine(tempPath, Constants.OutroFileName);
+                var outroDestinationPath = Path.Combine(tempPath, "outro-processed.mp4");
+
+                await Helpers.ExecuteFFmpegCommand(FfmpegCommandBuilder.WithText(
+                     sourceVideoPath: outroSourcePath,
+                     subtitles: string.Empty,
+                     outputVideoPath: outroDestinationPath,
+                     fontSize: 80,
+                     TextPlacement.Centered
+                     ));
 
                 // Create a MemoryStream to store the zip file
                 using var memoryStream = new MemoryStream();
@@ -77,6 +88,7 @@ namespace FfmpegFunction
                         }
                         await AddBlobToFileList(fileListWriter, containerClient, blobItem.Name, tempPath);
                     }
+                    fileListWriter.WriteLine($"file '{outroDestinationPath}'");
                 }
 
                 var concatFilePath = Path.Combine(tempPath, Constants.FinalVideoFileName);
@@ -114,6 +126,10 @@ namespace FfmpegFunction
 
             var transitionBlobClient = introContainerClient.GetBlobClient(Constants.TransitionFileName);
             await transitionBlobClient.DownloadToAsync(Path.Combine(tempPath, Constants.TransitionFileName));
+
+            var outroContainerClient = blobService.GetBlobContainerClient(Constants.ResourceContainer);
+            var outroblobClient = introContainerClient.GetBlobClient(Constants.OutroFileName);
+            await outroblobClient.DownloadToAsync(Path.Combine(tempPath, Constants.OutroFileName));
         }
 
 
