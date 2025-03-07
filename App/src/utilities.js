@@ -24,20 +24,3 @@ export const prepFile = (recordedChunks, type) => {
     .replace(/[:.]/g, "-")}.${type}`;
   return { blob, fileName };
 };
-
-export const getSrtFile = (duration, text) => {
-  // Generate and save SRT file
-  const srtContent = `1\n00:00:00,000 --> 00:00:${duration},000\n${text}`;
-  return prepFile([srtContent], "srt");
-};
-
-export const downloadFile = (blob, fileName) => {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-};

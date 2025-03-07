@@ -1,6 +1,7 @@
-using Microsoft.Azure.Functions.Worker;
+﻿using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Shared;
 using Shared.Models;
 using System;
@@ -41,20 +42,19 @@ namespace FfmpegFunction
             }
 
             var videofileBlobClient = unprocessedContainer.GetBlobClient(blobName);
-            var subfileBlobclient = unprocessedContainer.GetBlobClient($"{blobNameBase}.srt");
+            var subfileBlobclient = unprocessedContainer.GetBlobClient(fileMetaData.GetSubFileName());
             var tempFolder = $"{fileMetaData.SessionKey}-{fileMetaData.Id}";
 
             var tempPath = Path.Combine(Path.GetTempPath(), tempFolder);
             Directory.CreateDirectory(tempPath);
             var videoFilePath = Path.Combine(tempPath, "file.mp4");
-            var subFilePath = Path.Combine(tempPath, "file.srt");
-
             using (var fileStream = new FileStream(videoFilePath, FileMode.Create))
             {
                 await blobContentStream.CopyToAsync(fileStream);
             }
+            string? subtitleText = null;
             if (subfileBlobclient.Exists())
-                await subfileBlobclient.DownloadToAsync(subFilePath);
+                subtitleText = JsonConvert.DeserializeObject<string>((await subfileBlobclient.DownloadContentAsync()).Value.Content.ToString());
 
             var sessionContainer = Helpers.GetContainerBySessionKey(blobService, fileMetaData.SessionKey);
             try
@@ -63,13 +63,14 @@ namespace FfmpegFunction
 
                 string ffmpegCmd;
 
-                if (fileMetaData.VideoType == Constants.VideoTypes.Testimonial)
+                if (subtitleText != null)
                 {
-                    ffmpegCmd = $"-i \"{videoFilePath}\" -filter:a \"volume=3\" -vf \"scale=-1:1080,pad=1920:1080:(1920-iw)/2:(1080-ih)/2,subtitles='{subFilePath.Replace("\\", "\\\\").Replace(":", "\\:")}'\" -r 30 -c:v libx264 -c:a aac -ar 48000  \"{outputFilePath}\"";
+                    ffmpegCmd = FfmpegCommandBuilder.WithText(videoFilePath, subtitleText, outputFilePath, fontSize: 50, TextPlacement.Subtitle);
                 }
                 else
                 {
-                    ffmpegCmd = $"-i \"{videoFilePath}\" -filter:a \"volume=3\" -vf \"scale=-1:720,pad=1280:720:(1280-iw)/2:(720-ih)/2\" -r 30 -c:v libx264 -c:a aac -ar 48000 \"{outputFilePath}\"";
+                    ffmpegCmd = FfmpegCommandBuilder.HandheldFormat(sourceVideoPath: videoFilePath, outputFilePath);
+
                 }
 
                 await Helpers.ExecuteFFmpegCommand(ffmpegCmd);

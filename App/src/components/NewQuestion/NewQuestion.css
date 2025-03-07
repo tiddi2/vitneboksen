@@ -19,8 +19,8 @@
   background-color: rgba(14, 26, 64, 0.98);
   margin: 15% auto;
   padding: 20px;
-  border: 1px solid #888;
   width: 80%;
+  max-width: 50rem;
 }
 
 .new-question label {

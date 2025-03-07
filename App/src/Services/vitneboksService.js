@@ -48,13 +48,12 @@ export async function uploadTestimony(
   sessionKey,
   videofile,
   videoName,
-  subfile,
-  subName
+  subText
 ) {
   const urlWithQueryParam = `${process.env.REACT_APP_API}upload-testimony?sessionKey=${sessionKey}`;
   const formData = new FormData();
   formData.append("video", videofile, videoName);
-  formData.append("sub", subfile, subName);
+  formData.append("sub", subText);
   await uploadFile(urlWithQueryParam, formData);
 }
 

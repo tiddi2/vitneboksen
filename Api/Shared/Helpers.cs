@@ -1,7 +1,7 @@
 ﻿using Azure.Storage.Blobs;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Text;
-using System.Text.Json;
 
 namespace Shared
 {
@@ -39,8 +39,21 @@ namespace Shared
 
         public static async Task UploadJsonToStorage(BlobClient blobClient, object objectToSave)
         {
-            var serializedObject = JsonSerializer.Serialize(objectToSave);
+            var serializedObject = JsonConvert.SerializeObject(objectToSave);
             await blobClient.UploadAsync(BinaryData.FromString(serializedObject), overwrite: true);
+        }
+
+        public static async Task<T?> GetBlobFromStorage<T>(BlobContainerClient containerClient, string fileName)
+        {
+            var blobClient = containerClient.GetBlobClient(fileName);
+            if (blobClient.Exists())
+            {
+                var blob = await blobClient.DownloadContentAsync();
+                var json = blob?.Value?.Content?.ToString();
+                if (json != null)
+                    return JsonConvert.DeserializeObject<T>(json);
+            }
+            return default;
         }
 
         public static async Task AppServiceExecuteFFmpegCommand(string arguments)

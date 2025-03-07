@@ -1,6 +1,6 @@
 import "./Settings.css";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { startFinalVideoProcessing } from "../../Services/vitneboksService";
 import NewQuestion from "../NewQuestion/NewQuestion";
 import CloseButton from "../CloseButton/CloseButton";
@@ -13,8 +13,6 @@ const Settings = ({
   sessionKey,
   GetSession,
   setInputKey,
-  sessionFetchTime,
-  sessionWaiting,
   testimonialCount,
   actionShotCount,
   lastUpload,
@@ -29,6 +27,15 @@ const Settings = ({
 }) => {
   const [isEditingQuestion, setIsEditingQuestion] = useState(false);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
+  const [localSessionName, setLocalSessionName] = useState();
+
+  const handleSessionNameChange = (e) => {
+    setSessionName(localSessionName);
+  };
+
+  useEffect(() => {
+    setLocalSessionName(sessionName);
+  }, [sessionName]);
 
   const handleDownload = (url) => {
     const link = document.createElement("a");
@@ -37,6 +44,14 @@ const Settings = ({
     link.click();
     document.body.removeChild(link);
   };
+
+  useEffect(() => {
+    const intervalId = setInterval(GetSession, 4000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [GetSession]);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -81,7 +96,7 @@ const Settings = ({
         {sessionKey && (
           <div>
             <div>
-              <span>Ventetid mellom opptak:</span>
+              <span>Tid mellom opptak:</span>
               <span>
                 <input
                   type="number"
@@ -97,21 +112,33 @@ const Settings = ({
                 <span> sekunder</span>
               </span>
             </div>
-            <div>
-              <span>Spørsmål </span>
-              <button onClick={() => setShowModal(true)}>
-                Legg til nytt spørsmål
-              </button>
-            </div>
           </div>
         )}
+
         {sessionKey &&
           questions &&
           questions.map((question, index) => {
             return (
-              <div key={index}>
-                <span>{question.text}</span>
-                <span className="settings-button-group">
+              <div
+                className="question"
+                style={{
+                  borderBottom: "1px solid rgba(255,255,255,0.3)",
+                  padding: "0.5rem",
+                  borderRadius: "0",
+                  display: "grid",
+                  gridTemplateColumns: "6fr 1fr 1fr ",
+                  gap: "1rem",
+                }}
+                key={index}
+              >
+                <p style={{}}>{question.text}</p>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1rem",
+                  }}
+                >
                   <button
                     onClick={() => {
                       setIsEditingQuestion(true);
@@ -130,6 +157,14 @@ const Settings = ({
                   >
                     Slett
                   </button>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1rem",
+                  }}
+                >
                   <button
                     onClick={() => {
                       if (index === 0) return;
@@ -141,7 +176,7 @@ const Settings = ({
                       ]);
                     }}
                   >
-                    ^
+                    Opp
                   </button>
                   <button
                     onClick={() => {
@@ -154,13 +189,19 @@ const Settings = ({
                       ]);
                     }}
                   >
-                    v
+                    Ned
                   </button>
-                </span>
+                </div>
               </div>
             );
           })}
-
+        <div>
+          <div>
+            <button onClick={() => setShowModal(true)}>
+              Legg til nytt spørsmål
+            </button>
+          </div>
+        </div>
         {isEditingQuestion && (
           <NewQuestion
             closeModal={() => {
@@ -225,48 +266,68 @@ const Settings = ({
           <React.Fragment>
             <div>
               <h3>Tilkobling</h3>
-              <span>
-                Sist sjekket {new Date(sessionFetchTime).toLocaleTimeString()}{" "}
-                <span
-                  className={`clickable ${sessionWaiting ? "spinner" : ""}`}
-                  onClick={() => GetSession()}
-                >
-                  🔄️
-                </span>
-              </span>
             </div>
             <div>
               <span>Arrangementnavn:</span>
               <input
                 type="test"
-                value={sessionName}
-                onChange={(e) => setSessionName(e.target.value)}
+                value={localSessionName}
+                onBlur={handleSessionNameChange}
+                onChange={(e) => setLocalSessionName(e.target.value)}
               />
             </div>
             <div>
-              <span>Antall videoer:</span>
+              <span>Antall videoer: {testimonialCount + actionShotCount}</span>
               <div>
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
+                    gridTemplateColumns: " 2fr 3fr",
                   }}
                 >
                   <div>
-                    <span>Vitnesbyrd: {testimonialCount}</span>
-                    <br />
-                    <span>Delelink: {actionShotCount}</span>
-                    <br />
+                    <button
+                      onClick={() =>
+                        handleDownload(
+                          `download-session-files?sessionKey=${sessionKey}`
+                        )
+                      }
+                    >
+                      Last ned .zip
+                    </button>
                   </div>
-                  <button
-                    onClick={() =>
-                      handleDownload(
-                        `download-session-files?sessionKey=${sessionKey}`
-                      )
-                    }
-                  >
-                    Last ned alle filer
-                  </button>
+                  <div>
+                    {testimonialCount + actionShotCount >= 1 &&
+                    finalVideoProcessingCompleted ? (
+                      <button
+                        onClick={() =>
+                          handleDownload(
+                            `download-final-video?sessionKey=${sessionKey}`
+                          )
+                        }
+                      >
+                        Last ned vitneboksvideo
+                      </button>
+                    ) : (
+                      <button
+                        className="button"
+                        disabled={finalVideoProcessingStarted}
+                        onClick={async () => {
+                          await startFinalVideoProcessing(
+                            sessionKey,
+                            sessionName
+                          );
+                          GetSession(sessionKey);
+                        }}
+                      >
+                        {!finalVideoProcessingStarted ? (
+                          "Sett sammen Vitneboksvideo"
+                        ) : (
+                          <span className="spinner">🤖</span>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -276,45 +337,8 @@ const Settings = ({
                 <span>{new Date(lastUpload).toLocaleString()}</span>
               </div>
             )}
-            {testimonialCount + actionShotCount >= 1 &&
-              !finalVideoProcessingCompleted && (
-                <div>
-                  <span>
-                    Vitneboksvideoen <br /> - Samle alle videoene til én fil.
-                  </span>
-                  <button
-                    className="button"
-                    disabled={finalVideoProcessingStarted}
-                    onClick={async () => {
-                      await startFinalVideoProcessing(sessionKey, sessionName);
-                      GetSession(sessionKey);
-                    }}
-                  >
-                    {!finalVideoProcessingStarted ? (
-                      "Lag video"
-                    ) : (
-                      <span className="spinner">🤖</span>
-                    )}
-                  </button>
-                </div>
-              )}
             {actionShotCount + testimonialCount >= 1 &&
-              finalVideoProcessingCompleted && (
-                <div>
-                  <span>
-                    Vitneboksvideoen <br /> - Samle alle videoene til én fil.
-                  </span>
-                  <button
-                    onClick={() =>
-                      handleDownload(
-                        `download-final-video?sessionKey=${sessionKey}`
-                      )
-                    }
-                  >
-                    Last ned
-                  </button>
-                </div>
-              )}
+              finalVideoProcessingCompleted && <div></div>}
             <div>
               <span>Vitneboks-ID:</span>
               <input type="text" value={sessionKey} disabled={true} />

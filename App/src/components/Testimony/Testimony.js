@@ -8,12 +8,7 @@ import {
 } from "../../Services/vitneboksService";
 import "./Testimony.css";
 import Settings from "../Settings/Settings";
-import {
-  GetRecordingConstrains,
-  downloadFile,
-  getSrtFile,
-  prepFile,
-} from "../../utilities";
+import { GetRecordingConstrains, prepFile } from "../../utilities";
 import Footer from "../Footer/Footer";
 
 const Testimony = () => {
@@ -41,12 +36,9 @@ const Testimony = () => {
     useState(false);
   const [finalVideoProcessingCompleted, setFinalVideoProcessingCompleted] =
     useState(false);
-  const [sessionWaiting, setSessionWaiting] = useState(false);
-  const [sessionFetchTime, setSessionFetchTime] = useState(null);
 
   const GetSession = useCallback(
     async (sessionKey = inputKey) => {
-      setSessionWaiting(true);
       if (sessionKey == null) {
         sessionKey = localStorage.getItem("sessionKey");
       }
@@ -75,8 +67,6 @@ const Testimony = () => {
         localStorage.setItem("sessionKey", newSessionKey);
         localStorage.setItem("sharedKey", newSharedKey);
       }
-      setSessionWaiting(false);
-      setSessionFetchTime(Date.now());
     },
     [inputKey, recording]
   );
@@ -164,26 +154,14 @@ const Testimony = () => {
             "mp4"
           );
 
-          const { blob: srtBlob } = getSrtFile(
-            currentQuestion.recordTime / 1000,
-            currentQuestion.text
+          await uploadTestimony(
+            sessionKey,
+            videoBlob,
+            videoFileName,
+            currentQuestion.text,
+            videoFileName.replace("mp4", "srt")
           );
-
-          // Save video
-          if (!sessionKey) {
-            downloadFile(videoBlob, videoFileName);
-            downloadFile(srtBlob, videoFileName.replace("mp4", "srt"));
-          } else {
-            // upload video
-            await uploadTestimony(
-              sessionKey,
-              videoBlob,
-              videoFileName,
-              srtBlob,
-              videoFileName.replace("mp4", "srt")
-            );
-            await GetSession(sessionKey);
-          }
+          await GetSession(sessionKey);
         };
 
         setTimeout(async () => {
@@ -278,7 +256,6 @@ const Testimony = () => {
           marginTop: "3rem",
           textAlign: "center",
           fontSize: recording ? null : "3em",
-          transition: "all 3s ease",
         }}
       >
         {started && !waiting && question}
@@ -455,8 +432,6 @@ const Testimony = () => {
           sessionKey={sessionKey}
           GetSession={GetSession}
           setInputKey={setInputKey}
-          sessionFetchTime={sessionFetchTime}
-          sessionWaiting={sessionWaiting}
           testimonialCount={testimonialCount}
           actionShotCount={actionShotCount}
           lastUpload={lastUpload}

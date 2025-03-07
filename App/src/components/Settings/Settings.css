@@ -2,7 +2,6 @@
   display: grid;
   grid-template-columns: 5fr 7fr;
   text-align: left;
-  margin-bottom: 0.5rem;
   width: 100%;
   align-items: center;
 }
@@ -33,11 +32,6 @@
   max-height: 80vh;
   overflow-y: scroll;
 }
-
-.settings .settings-button-group {
-  display: flex;
-  justify-content: space-between;
-}
-.settings .settings-button-group > button {
-  padding: 0.8em;
+.settings button {
+  padding: 0.5rem;
 }
