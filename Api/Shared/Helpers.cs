@@ -43,6 +43,19 @@ namespace Shared
             await blobClient.UploadAsync(BinaryData.FromString(serializedObject), overwrite: true);
         }
 
+        public static async Task<T?> GetBlobFromStorage<T>(BlobContainerClient containerClient, string fileName)
+        {
+            var blobClient = containerClient.GetBlobClient(fileName);
+            if (blobClient.Exists())
+            {
+                var blob = await blobClient.DownloadContentAsync();
+                var json = blob?.Value?.Content?.ToString();
+                if (json != null)
+                    return JsonConvert.DeserializeObject<T>(json);
+            }
+            return default;
+        }
+
         public static async Task AppServiceExecuteFFmpegCommand(string arguments)
         {
             string environment = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT")!;

@@ -16,9 +16,11 @@ public static class DownloadFinalVideo
             return Results.NotFound("Not found");
         }
 
+        var session = await Helpers.GetBlobFromStorage<Session>(containerClient, Constants.SessionInfoFileName);
+
         var blob = containerClient.GetBlobClient(Constants.FinalVideoFileName);
         var blobContent = await blob.DownloadContentAsync();
 
-        return Results.File(blobContent.Value.Content.ToStream(), "video/mp4", $"vitneboksen-{DateTime.Now.ToShortDateString()}.mp4");
+        return Results.File(blobContent.Value.Content.ToStream(), "video/mp4", $"vitneboksen-{session!.SessionName}.mp4");
     }
 }

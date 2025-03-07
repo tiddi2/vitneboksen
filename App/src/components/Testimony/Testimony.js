@@ -221,7 +221,6 @@ const Testimony = () => {
           marginTop: "3rem",
           textAlign: "center",
           fontSize: recording ? null : "3em",
-          transition: "all 3s ease",
         }}
       >
         {started && !waiting && question}

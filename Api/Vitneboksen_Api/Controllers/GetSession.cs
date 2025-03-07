@@ -1,5 +1,4 @@
 using Shared;
-using System.Text.Json;
 
 namespace Vitneboksen_Api.Controllers;
 
@@ -29,22 +28,12 @@ public static class GetSession
         var actionshots = blobs.Count(b => b.Name.Contains(Constants.VideoTypes.ActionShot));
 
         var latestUploadTime = blobs.Where(b => b.Name != Constants.FinalVideoFileName).MaxBy(b => b.Properties.CreatedOn)?.Properties.CreatedOn;
-
         var blobClient = containerClient.GetBlobClient(Constants.SessionInfoFileName);
-        var session = new Session("", []);
-        if (blobClient.Exists())
+
+        var session = await Helpers.GetBlobFromStorage<Session>(containerClient, Constants.SessionInfoFileName);
+        if (session == null)
         {
-            var blob = await blobClient.DownloadContentAsync();
-            var json = blob?.Value?.Content?.ToString();
-            if (json != null)
-                session = JsonSerializer.Deserialize<Session>(json);
-        }
-        else
-        {
-            session = new Session(
-                string.Empty,
-                []
-                );
+            session = new Session(string.Empty, []);
             await Helpers.UploadJsonToStorage(blobClient, session);
         }
 

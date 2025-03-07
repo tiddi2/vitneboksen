@@ -29,7 +29,7 @@ button,
   color: rgb(0, 0, 0);
   outline: none;
   background-color: #fdb542;
-  padding: 2% 4%;
+  padding: 1em 1.5em;
   text-decoration: none;
   box-sizing: content-box;
   cursor: pointer;
