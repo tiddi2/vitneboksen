@@ -51,7 +51,7 @@ const Settings = ({
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [GetSession]);
 
   const [showModal, setShowModal] = useState(false);
 
